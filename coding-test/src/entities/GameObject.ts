@@ -39,4 +39,7 @@ export abstract class GameObject {
     this.elem.style.top = `${this.y - this.height / 2}px`;
     this.elem.style.left = `${this.x - this.width / 2}px`;
   }
+
+  render(): void {
+  }
 }

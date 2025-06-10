@@ -167,6 +167,14 @@ body {
   margin-bottom: 20px;
 }
 
+#timer {
+  position: absolute;
+  top: -40px;          /* 박스보다 위로 */
+  right: 0;
+  font-size: 24px;
+  font-weight: bold;
+}
+
 #game-area {
   position: relative;
   display: none;

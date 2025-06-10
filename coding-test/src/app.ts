@@ -1,6 +1,8 @@
 import { GameManager, GameStatus } from "./entities/GameManager";
 import { GameObject } from "./entities/GameObject";
 import { MyBall } from "./entities/MyBall";
+import { BombBall } from "./entities/BombBall";
+import { spawnBall, BallType } from "./entities/BallSpawner";
 
 const startButton = document.getElementById("start-button");
 const startButton2 = document.getElementById("start-button-2");
@@ -12,15 +14,39 @@ let lastFrameTime: null | number = null;
 let dt = 0;
 const gameObjMap: Map<string, GameObject> = new Map();
 
+let elapsedTime = 0;              // 흐른 총 시간(ms)
+let lastBombSpawnTime = 0;        // 마지막 bomb 생성 시점
+const bombSpawnInterval = 3000;   // 3초마다 bomb 생성
+
 function runGameLoop() {
   const currentTime = new Date().getTime();
   if (lastFrameTime === null) {
     lastFrameTime = currentTime;
   }
   dt = currentTime - lastFrameTime;
+  elapsedTime += dt;
+
   for (const gameObj of gameObjMap.values()) {
     gameObj.update(dt);
   }
+
+  // BombBall 주기적 생성
+  if (elapsedTime - lastBombSpawnTime >= bombSpawnInterval) {
+    lastBombSpawnTime = elapsedTime;
+    spawnBall(BallType.Bomb, GameManager.GameArea!, gameObjMap);
+  }
+
+  // 충돌 검사
+  const myBall = gameObjMap.get("myBall");
+  for (const [key, obj] of gameObjMap.entries()) {
+    if (key.startsWith("Bomb") && myBall && checkCollision(myBall, obj)) {
+      GameManager.GameStatus = GameStatus.END;
+      break;
+    }
+  }
+
+  updateTimerDisplay(elapsedTime);
+
   lastFrameTime = currentTime;
   if (GameManager.GameStatus === GameStatus.END) {
     alert("Game Over!");
@@ -32,6 +58,7 @@ function runGameLoop() {
   raf = requestAnimationFrame(runGameLoop);
 }
 
+// 공 피하기 게임
 startButton?.addEventListener("click", () => {
   intialUis.forEach((ui) => {
     (ui as HTMLElement).style.display = "none";
@@ -54,6 +81,11 @@ startButton?.addEventListener("click", () => {
   );
 
   gameObjMap.set("myBall", myBallObj);
+
+  const initialBombCount = 2 + Math.floor(Math.random() * 2); // 2 or 3
+  for (let i = 0; i < initialBombCount; i++) {
+    spawnBall(BallType.Bomb, gameArea, gameObjMap);
+  }
 
   for (const gameObj of gameObjMap.values()) {
     gameArea!.appendChild(gameObj.elem!);
@@ -101,6 +133,7 @@ startButton?.addEventListener("click", () => {
   runGameLoop();
 });
 
+// 공 먹기 게임
 startButton2?.addEventListener("click", () => {
   intialUis.forEach((ui) => {
     (ui as HTMLElement).style.display = "none";
@@ -169,3 +202,27 @@ startButton2?.addEventListener("click", () => {
   registerKeyboardEvent();
   runGameLoop();
 });
+
+function checkCollision(a: GameObject, b: GameObject): boolean {
+  const ax = a.x + a.width / 2;
+  const ay = a.y + a.height / 2;
+  const bx = b.x + b.width / 2;
+  const by = b.y + b.height / 2;
+
+  const dx = ax - bx;
+  const dy = ay - by;
+  const distance = Math.sqrt(dx * dx + dy * dy);
+
+  const radiusA = a.width / 2;
+  const radiusB = b.width / 2;
+
+  return distance <= radiusA + radiusB;
+}
+
+function updateTimerDisplay(ms: number) {
+  const sec = Math.floor(ms / 1000);
+  const timerElem = document.getElementById("timer");
+  if (timerElem) {
+    timerElem.innerText = `Time: ${sec}s`;
+  }
+}
