@@ -11,9 +11,9 @@ export class MyBall extends GameObject {
     super(elem, width, height, x, y);
     elem.style.backgroundColor = "red";
     elem.style.borderRadius = "999px";
-    elem.style.position = "absolute"; // ✅ 필수
-    elem.style.width = `${width}px`;  // ✅ 추가
-    elem.style.height = `${height}px`; // ✅ 추가
+    elem.style.position = "absolute";
+    elem.style.width = `${width}px`;
+    elem.style.height = `${height}px`;
   }
 
   update(dt: number) {
