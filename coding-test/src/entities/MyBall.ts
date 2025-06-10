@@ -11,5 +11,55 @@ export class MyBall extends GameObject {
     super(elem, width, height, x, y);
     elem.style.backgroundColor = "red";
     elem.style.borderRadius = "999px";
+    elem.style.position = "absolute"; // ✅ 필수
+    elem.style.width = `${width}px`;  // ✅ 추가
+    elem.style.height = `${height}px`; // ✅ 추가
+  }
+
+  update(dt: number) {
+    const radian = (this.degree * Math.PI) / 180;
+    const dx = Math.cos(radian) * this.speed * dt * 0.5;
+    const dy = Math.sin(radian) * this.speed * dt * 0.5;
+
+    this.x += dx;
+    this.y += dy;
+
+    this.detectWallCollision();
+    this.render();
+  }
+
+  detectWallCollision() {
+  const ballSize = this.width;
+  const area = this.elem!.parentElement as HTMLElement;
+
+  const areaWidth = area.clientWidth;
+  const areaHeight = area.clientHeight;
+
+  // 좌우 벽
+  if (this.x <= 0) {
+    this.x = 0;
+    this.degree = 180 - this.degree;
+
+  } else if (this.x + ballSize >= areaWidth) {
+    this.x = areaWidth - ballSize;
+    this.degree = 180 - this.degree;
+  }
+
+  // 상하 벽
+  if (this.y <= 0) {
+    this.y = 0;
+    this.degree = -this.degree;
+  } else if (this.y + ballSize >= areaHeight) {
+    this.y = areaHeight - ballSize;
+    this.degree = -this.degree;
+  }
+
+  // 각도는 0~360 사이로 보정
+  this.degree = (this.degree + 360) % 360;
+}
+
+  render() {
+    this.elem!.style.left = `${this.x}px`;
+    this.elem!.style.top = `${this.y}px`;
   }
 }
