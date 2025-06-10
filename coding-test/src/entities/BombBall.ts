@@ -9,7 +9,7 @@ export class BombBall extends GameObject {
     y: number
   ) {
     super(elem, width, height, x, y);
-    elem.style.backgroundColor = "blue";
+    elem.style.backgroundColor = "black";
     elem.style.borderRadius = "999px";
     elem.style.position = "absolute";
     elem.style.width = `${width}px`;
