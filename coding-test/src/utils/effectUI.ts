@@ -7,10 +7,15 @@ export class EffectDisplay {
     this.container.id = "effect-display";
     this.container.style.cssText = `
       position: fixed;
-      top: 20px;
-      left: 20px;
+      top: 50%;
+      left: 50%;
+      transform: translateX(-50%);
       z-index: 1000;
       pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
     `;
     document.body.appendChild(this.container);
   }
@@ -19,25 +24,28 @@ export class EffectDisplay {
     const effectElement = document.createElement("div");
     effectElement.textContent = message;
     effectElement.style.cssText = `
-      background: rgba(0,0,0,0.8);
+      background: rgba(0,0,0,0.9);
       color: ${color};
-      padding: 10px 20px;
-      border-radius: 5px;
-      margin-bottom: 5px;
-      animation: effectBlink 3s ease-in-out;
-      font-size: 14px;
+      padding: 15px 30px;
+      border-radius: 10px;
+      font-size: 18px;
       font-weight: bold;
-      border: 2px solid ${color};
+      border: 3px solid ${color};
+      box-shadow: 0 0 20px ${color}40, inset 0 0 20px ${color}20;
+      animation: effectNotification 1.5s ease-in-out;
+      text-align: center;
+      min-width: 200px;
+      text-shadow: 0 0 10px ${color};
     `;
 
     this.container.appendChild(effectElement);
 
-    // 3초 후 제거
+    // 1.5초 후 제거
     setTimeout(() => {
       if (effectElement.parentNode) {
         effectElement.parentNode.removeChild(effectElement);
       }
-    }, 3000);
+    }, 1500);
   }
 
   destroy() {

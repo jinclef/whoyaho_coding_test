@@ -5,6 +5,8 @@ import { spawnBall, BallType } from "./entities/BallSpawner";
 import { registerKeyboardEvent, updateTimerDisplay, checkCollision } from "./utils/gameUtils";
 import { Item, ItemType } from "./entities/Item";
 import { EffectDisplay } from "./utils/effectUI";
+import { spawnRandomItem } from "./entities/ItemSpawner";
+import { applyItemEffect } from "./entities/applyItemEffect";
 
 // 게임 상태 관리
 class GameState {
@@ -13,6 +15,7 @@ class GameState {
   lives: number = 1;
   slowMotionEndTime: number = 0;
   invincibleEndTime: number = 0;
+  itemInvincibleEndTime: number = 0;
 
 	getScore(): number {
 		return this.baseScore + this.bonusScore;
@@ -38,6 +41,10 @@ class GameState {
   isInvincibleActive(currentTime: number): boolean {
     return currentTime < this.invincibleEndTime;
   }
+
+  isItemInvincibleActive(currentTime: number): boolean {
+    return currentTime < this.itemInvincibleEndTime;
+  }
 }
 // 전역 변수들
 let raf: number;
@@ -47,51 +54,10 @@ const gameObjMap: Map<string, GameObject> = new Map();
 let elapsedTime = 0;
 let lastBombSpawnTime = 0;
 let lastItemSpawnTime = 0;
-const bombSpawnInterval = 3000;
-const itemSpawnInterval = 8000; // 8초마다 아이템 스폰
+const bombSpawnInterval = 3000; // TODO: 시간이 지날수록 빠르게 스폰.
+const itemSpawnInterval = 8000; // 8초마다 아이템 스폰 // TODO: random
 const gameState = new GameState();
 let effectDisplay: EffectDisplay;
-
-// CSS 애니메이션 추가
-const styleSheet = document.createElement("style");
-styleSheet.textContent = `
-  @keyframes itemFloat {
-    0% { transform: translateY(0px) scale(1); }
-    100% { transform: translateY(-10px) scale(1.1); }
-  }
-  
-  @keyframes effectBlink {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.7; transform: scale(1.05); }
-  }
-
-	@keyframes explode {
-    0% { 
-      transform: scale(0) rotate(0deg);
-      opacity: 1;
-    }
-    50% { 
-      transform: scale(1.5) rotate(180deg);
-      opacity: 0.8;
-    }
-    100% { 
-      transform: scale(3) rotate(360deg);
-      opacity: 0;
-    }
-  }
-  
-  @keyframes particle {
-    0% { 
-      transform: translate(0, 0) scale(1);
-      opacity: 1;
-    }
-    100% { 
-      transform: translate(var(--dx), var(--dy)) scale(0);
-      opacity: 0;
-    }
-  }
-`;
-document.head.appendChild(styleSheet);
 
 export function startAvoidingGame() {
   const intialUis = document.querySelectorAll(".initial-ui");
@@ -180,12 +146,12 @@ function runGameLoop(gameArea: HTMLElement) {
   // 새 아이템 스폰
   if (elapsedTime - lastItemSpawnTime >= itemSpawnInterval) {
     lastItemSpawnTime = elapsedTime;
-    spawnRandomItem(gameArea, currentTime);
+    spawnRandomItem(gameArea, currentTime, gameObjMap);
   }
 
   // 충돌 검사 (무적 상태가 아닐 때만)
   const myBall = gameObjMap.get("myBall");
-  if (!gameState.isInvincibleActive(currentTime)) {
+  if (!gameState.isInvincibleActive(currentTime) || !gameState.isItemInvincibleActive(currentTime)) {
     for (const [key, obj] of gameObjMap.entries()) {
       if (key.startsWith("Bomb") && myBall && checkCollision(myBall, obj)) {
         gameState.lives--;
@@ -219,24 +185,6 @@ function runGameLoop(gameArea: HTMLElement) {
   raf = requestAnimationFrame(() => runGameLoop(gameArea));
 }
 
-function spawnRandomItem(gameArea: HTMLElement, currentTime: number) {
-  const boundingRect = gameArea.getBoundingClientRect();
-  const itemTypes = Object.values(ItemType);
-  const randomType = itemTypes[Math.floor(Math.random() * itemTypes.length)];
-  
-  // spawnBall과 동일한 패딩 로직 사용
-  const padding = 50;
-  const x = padding + Math.random() * (boundingRect.width - 30 - padding * 2);
-  const y = padding + Math.random() * (boundingRect.height - 30 - padding * 2);
-  
-  const item = new Item(randomType, x, y, currentTime);
-  const itemKey = `Item_${currentTime}_${Math.floor(Math.random() * 10000)}`;
-  
-  gameObjMap.set(itemKey, item);
-  gameArea.appendChild(item.elem!);
-  
-  item.render();
-}
 
 function handleItemLogic(_gameArea: HTMLElement, currentTime: number) {
   const myBall = gameObjMap.get("myBall");
@@ -254,7 +202,7 @@ function handleItemLogic(_gameArea: HTMLElement, currentTime: number) {
 
       // 플레이어와 아이템 충돌 확인
       if (myBall && checkCollision(myBall, item)) {
-        applyItemEffect(item.type, currentTime);
+        applyItemEffect(item.type, currentTime, gameState, effectDisplay, gameObjMap);
         itemsToRemove.push(key);
       }
     }
@@ -270,113 +218,6 @@ function handleItemLogic(_gameArea: HTMLElement, currentTime: number) {
   });
 }
 
-
-function applyItemEffect(itemType: ItemType, currentTime: number) {
-  switch (itemType) {
-    case ItemType.SlowMotion:
-      gameState.slowMotionEndTime = currentTime + 5000; // 5초간 슬로우 모션
-      effectDisplay.showEffect("슬로우 모션 활성화! (5초)", "#00ffff");
-      break;
-      
-    case ItemType.Points1000:
-			gameState.addBonusScore(1000);
-      effectDisplay.showEffect("+1000점!", "#ffff00");
-      break;
-      
-    case ItemType.Points10000:
-			gameState.addBonusScore(10000);
-      effectDisplay.showEffect("+10000점!", "#ff00ff");
-      break;
-      
-    case ItemType.RemoveBomb:
-      removeBomb();
-      effectDisplay.showEffect("폭탄 제거!", "#00ff00");
-      break;
-      
-    case ItemType.ExtraLife:
-      gameState.lives++;
-      effectDisplay.showEffect(`생명 +1 (총 ${gameState.lives}개)`, "#ff4080");
-      break;
-      
-    case ItemType.Invincible:
-      gameState.invincibleEndTime = currentTime + 5000; // 5초간 무적
-      effectDisplay.showEffect("5초간 무적!", "#ffffff");
-      break;
-  }
-}
-
-function removeBomb() {
-  const bombKeys = Array.from(gameObjMap.keys()).filter(key => key.startsWith("Bomb"));
-  if (bombKeys.length > 0) {
-    const randomBombKey = bombKeys[Math.floor(Math.random() * bombKeys.length)];
-    const bomb = gameObjMap.get(randomBombKey);
-    if (bomb && bomb.elem && bomb.elem.parentNode) {
-			createExplosionEffect(bomb.x + bomb.width / 2, bomb.y + bomb.height / 2, bomb.elem.parentNode as HTMLElement);
-      bomb.elem.parentNode.removeChild(bomb.elem);
-    }
-    gameObjMap.delete(randomBombKey);
-  }
-}
-
-
-function createExplosionEffect(x: number, y: number, container: HTMLElement) {
-  // 메인 폭발 효과
-  const explosion = document.createElement("div");
-  explosion.style.cssText = `
-    position: absolute;
-    left: ${x - 25}px;
-    top: ${y - 25}px;
-    width: 50px;
-    height: 50px;
-    background: radial-gradient(circle, #ff6b00 0%, #ff0000 30%, #ffff00 60%, transparent 100%);
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 1000;
-    animation: explode 0.6s ease-out forwards;
-  `;
-  
-  // 폭발 파티클들
-  for (let i = 0; i < 8; i++) {
-    const particle = document.createElement("div");
-    const angle = (i / 8) * Math.PI * 2;
-    const distance = 30 + Math.random() * 20;
-    const size = 4 + Math.random() * 6;
-    
-    particle.style.cssText = `
-      position: absolute;
-      left: ${x - size/2}px;
-      top: ${y - size/2}px;
-      width: ${size}px;
-      height: ${size}px;
-      background: ${['#ff6b00', '#ff0000', '#ffff00', '#ff3300'][Math.floor(Math.random() * 4)]};
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 999;
-      animation: particle 0.8s ease-out forwards;
-      --dx: ${Math.cos(angle) * distance}px;
-      --dy: ${Math.sin(angle) * distance}px;
-    `;
-    
-    container.appendChild(particle);
-    
-    // 파티클 자동 제거
-    setTimeout(() => {
-      if (particle.parentNode) {
-        particle.parentNode.removeChild(particle);
-      }
-    }, 800);
-  }
-  
-  container.appendChild(explosion);
-  
-  // 폭발 효과 자동 제거
-  setTimeout(() => {
-    if (explosion.parentNode) {
-      explosion.parentNode.removeChild(explosion);
-    }
-  }, 600);
-}
-
 function updateDisplays() {
   updateTimerDisplay(elapsedTime);
   
@@ -386,9 +227,18 @@ function updateDisplays() {
       점수: ${gameState.getScore().toLocaleString()}<br>
       생명: ${gameState.lives}<br>
 			폭탄수: ${Array.from(gameObjMap.keys()).filter(key => key.startsWith("Bomb")).length}<br>
-      ${gameState.isSlowMotionActive(Date.now()) ? "🐌 슬로우" : ""}
-      ${gameState.isInvincibleActive(Date.now()) ? "✨ 무적" : ""}
     `;
+  }
+
+	// 무적 상태에 따라 myBall 색상 변경
+  const myBall = gameObjMap.get("myBall");
+  if (myBall && myBall.elem) {
+    if (gameState.isItemInvincibleActive(Date.now())) {
+      myBall.elem.classList.add("invincible");
+    }
+    else {
+      myBall.elem.classList.remove("invincible");
+    }
   }
 }
 

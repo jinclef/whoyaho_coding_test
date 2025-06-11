@@ -11,32 +11,40 @@ export enum BallType {
 }
 
 export function spawnBall(
-  type: BallType,
-  gameArea: HTMLElement,
-  map: Map<string, GameObject>
+ type: BallType,
+ gameArea: HTMLElement,
+ map: Map<string, GameObject>
 ): void {
-  const rect = gameArea.getBoundingClientRect();
-  const size = rect.height * 0.05;
-  const padding = size + 10; // 벽에서 최소 거리 확보
-	const x = padding + Math.random() * (rect.width - padding * 2);
-	const y = padding + Math.random() * (rect.height - padding * 2);
-  const elem = document.createElement("div");
+ const rect = gameArea.getBoundingClientRect();
+ const size = rect.height * 0.05;
+ const padding = size + 10;
+ 
+ const myBall = map.get("myBall");
+ let x, y;
+ let attempts = 0;
+ 
+ // myBall 위치 피해서 생성
+ do {
+   x = padding + Math.random() * (rect.width - padding * 2);
+   y = padding + Math.random() * (rect.height - padding * 2);
+   attempts++;
+ } while (myBall && attempts < 10 && 
+          Math.sqrt((x - myBall.x) * (x - myBall.x) + (y - myBall.y) * (y - myBall.y)) < 100);
+ 
+ const elem = document.createElement("div");
 
-  let ball: GameObject;
+ let ball: GameObject;
 
-  switch (type) {
-    case BallType.Bomb:
-      ball = new BombBall(elem, size, size, x, y);
-      break;
-    // case BallType.Ice:
-    // case BallType.Speed:
-    // ...
-    default:
-      return;
-  }
+ switch (type) {
+   case BallType.Bomb:
+     ball = new BombBall(elem, size, size, x, y);
+     break;
+   default:
+     return;
+ }
 
-  const key = `${BallType[type]}-${ballIdCounter++}`;
-  map.set(key, ball);
-  gameArea.appendChild(ball.elem!);
-	ball.render();
+ const key = `${BallType[type]}-${ballIdCounter++}`;
+ map.set(key, ball);
+ gameArea.appendChild(ball.elem!);
+ ball.render();
 }
