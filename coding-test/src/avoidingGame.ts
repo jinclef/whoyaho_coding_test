@@ -158,10 +158,9 @@ function runGameLoop(gameArea: HTMLElement) {
         if (gameState.lives <= 0) {
           GameManager.GameStatus = GameStatus.END;
         } else {
-          effectDisplay.showEffect(`생명 -1 (남은 생명: ${gameState.lives})`, "#ff4040");
+          effectDisplay.showEffect(`라이프 -1 (남은 라이프: ${gameState.lives})`, "#ff4040");
           // 잠시 무적 상태로 만들기
           gameState.invincibleEndTime = currentTime + 2000;
-          // effectDisplay.showEffect("2초간 무적!", "#ffffff");
         }
         break;
       }
@@ -225,7 +224,7 @@ function updateDisplays() {
   if (scoreDisplay) {
     scoreDisplay.innerHTML = `
       점수: ${gameState.getScore().toLocaleString()}<br>
-      생명: ${gameState.lives}<br>
+      라이프: ${gameState.lives}<br>
 			폭탄수: ${Array.from(gameObjMap.keys()).filter(key => key.startsWith("Bomb")).length}<br>
     `;
   }
