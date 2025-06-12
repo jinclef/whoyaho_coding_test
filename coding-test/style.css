@@ -1,177 +1,305 @@
-html,
-body,
-div,
-span,
-applet,
-object,
-iframe,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-p,
-blockquote,
-pre,
-a,
-abbr,
-acronym,
-address,
-big,
-cite,
-code,
-del,
-dfn,
-em,
-img,
-ins,
-kbd,
-q,
-s,
-samp,
-small,
-strike,
-strong,
-sub,
-sup,
-tt,
-var,
-b,
-u,
-i,
-center,
-dl,
-dt,
-dd,
-ol,
-ul,
-li,
-fieldset,
-form,
-label,
-legend,
-table,
-caption,
-tbody,
-tfoot,
-thead,
-tr,
-th,
-td,
-article,
-aside,
-canvas,
-details,
-embed,
-figure,
-figcaption,
-footer,
-header,
-hgroup,
-menu,
-nav,
-output,
-ruby,
-section,
-summary,
-time,
-mark,
-audio,
-video {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  font-size: 100%;
-  font: inherit;
-  vertical-align: baseline;
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
 }
+
 /* HTML5 display-role reset for older browsers */
-article,
-aside,
-details,
-figcaption,
-figure,
-footer,
-header,
-hgroup,
-menu,
-nav,
-section {
-  display: block;
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+    display: block;
 }
+
 body {
-  line-height: 1;
+    line-height: 1;
 }
-ol,
-ul {
-  list-style: none;
+
+ol, ul {
+    list-style: none;
 }
-blockquote,
-q {
-  quotes: none;
+
+blockquote, q {
+    quotes: none;
 }
-blockquote:before,
-blockquote:after,
-q:before,
-q:after {
-  content: "";
-  content: none;
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+    content: '';
+    content: none;
 }
+
 table {
-  border-collapse: collapse;
-  border-spacing: 0;
+    border-collapse: collapse;
+    border-spacing: 0;
 }
 
 body {
-  background-color: aliceblue;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
+    background-color: aliceblue;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
 }
 
-#start-button {
-  background-color: black;
-  font-weight: bold;
-  padding: 20px;
-  color: white;
-  font-size: 34px;
-  border-radius: 10px;
-}
-
-#start-button:hover {
-  background-color: white;
-  color: black;
-}
-
-#start-button-2 {
-  background-color: black;
-  font-weight: bold;
-  padding: 20px;
-  color: white;
-  font-size: 34px;
-  border-radius: 10px;
-}
-
-#start-button-2:hover {
-  background-color: white;
-  color: black;
+.initial-ui {
+    margin: 10px;
 }
 
 #initial-title {
-  font-size: 40px;
-  font-weight: bold;
-  margin-bottom: 20px;
+    font-size: 40px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.option-selection {
+    background: #f0f0f0;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px;
+    display: none;
+}
+
+.option-group {
+    margin: 15px 0;
+}
+
+.option-group label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.option-btn {
+    background-color: #ddd;
+    padding: 10px 15px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.option-btn.selected {
+    background-color: #4CAF50;
+    color: white;
+    border-color: #45a049;
+}
+
+.start-button {
+    background-color: black;
+    font-weight: bold;
+    padding: 20px;
+    color: white;
+    font-size: 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    margin: 10px;
+}
+
+.start-button:hover {
+    background-color: #333;
+}
+
+.start-button:disabled {
+    background-color: #666;
+    cursor: not-allowed;
+}
+
+#game-container {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
 }
 
 #game-area {
-  position: relative;
-  display: none;
-  border: 5px solid black;
-  background-color: antiquewhite;
-  width: 80vw;
-  height: 80vh;
+    position: relative;
+    border: 5px solid black;
+    background-color: antiquewhite;
+    width: 80vw;
+    height: 60vh;
+    overflow: hidden;
+}
+
+.game-ui {
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 10px;
+    font-size: 20px;
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    justify-content: center;
+}
+
+.bonus-letters {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: rgba(128, 0, 128, 0.2);
+    padding: 10px;
+    border-radius: 5px;
+    border: 2px solid purple;
+}
+
+.bonus-letter {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #ddd;
+    text-align: center;
+    line-height: 30px;
+    font-weight: bold;
+    margin: 0 2px;
+}
+
+.bonus-letter.collected {
+    background: linear-gradient(45deg, #a29bfe, #fd79a8);
+    color: white;
+}
+
+.red-zone {
+    position: absolute;
+    background: rgba(255, 0, 0, 0.3);
+    border: 3px solid red;
+    border-radius: 50%;
+    animation: pulse 0.5s infinite alternate;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.3; }
+    100% { opacity: 0.7; }
+}
+
+.wall {
+    position: absolute;
+    background: #8B4513;
+    border: 2px solid #654321;
+}
+
+.portal {
+    position: absolute;
+    background: radial-gradient(circle, #00f, #008);
+    border: 3px solid #0af;
+    border-radius: 50%;
+    animation: portalGlow 1s infinite alternate;
+}
+
+@keyframes portalGlow {
+    0% { box-shadow: 0 0 10px #0af; }
+    100% { box-shadow: 0 0 20px #0af; }
+}
+
+.obstacle {
+    position: absolute;
+    background: #444;
+    border-radius: 50%;
+}
+
+.collectible {
+    position: absolute;
+    border-radius: 50%;
+}
+
+.attack-item {
+    background: linear-gradient(45deg, #ff6b6b, #feca57);
+    border: 2px solid #ff9f43;
+}
+
+.bonus-ball {
+    background: linear-gradient(45deg, #a29bfe, #fd79a8);
+    border: 2px solid #e84393;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+}
+
+.score-ball {
+    border: 2px solid #f39c12;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-shadow: 1px 1px 2px black;
+}
+
+.normal-ball {
+    background: #2ecc71;
+    border: 2px solid #27ae60;
+}
+
+.game-over-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.9);
+    color: white;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    display: none;
+    z-index: 10000;
+}
+
+.bonus-stage-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    font-size: 24px;
+    font-weight: bold;
+    display: none;
+    z-index: 10000;
+    animation: bonusStageGlow 1s infinite alternate;
+}
+
+@keyframes bonusStageGlow {
+    0% { box-shadow: 0 0 20px rgba(255, 107, 107, 0.5); }
+    100% { box-shadow: 0 0 40px rgba(78, 205, 196, 0.8); }
+}
+
+.exit {
+    position: absolute;
+    background: radial-gradient(circle, #00ff00, #008800);
+    border: 3px solid #00cc00;
+    border-radius: 10px;
+    animation: exitGlow 1s infinite alternate;
+}
+
+@keyframes exitGlow {
+    0% { box-shadow: 0 0 15px #00ff00; }
+    100% { box-shadow: 0 0 30px #00ff00; }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
 }
