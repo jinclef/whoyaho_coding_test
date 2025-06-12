@@ -80,8 +80,6 @@ export function spawnRandomBonusLetter() {
     Math.random() * (areaHeight - 50) + 25,
     'bonus', randomLetter
   );
-  
-  bonusBall.lifeTime = 8000; // 8초 후 사라짐
   bonusBall.timer = 0;
   
   gameObjMap.set(`bonus_${randomLetter}_${Date.now()}`, bonusBall);
@@ -346,7 +344,7 @@ export function startBonusStage() {
   
   // 기존 공들 제거하고 점수 공들 생성
   gameObjMap.forEach((obj, key) => {
-    if (key.startsWith('ball_') || key.startsWith('bonus_')) {
+    if (key.startsWith('ball_') || key.startsWith('bonus_') || key.startsWith('obstacle_')) {
       if (obj.elem && obj.elem.parentNode) {
         obj.elem.parentNode.removeChild(obj.elem);
       }

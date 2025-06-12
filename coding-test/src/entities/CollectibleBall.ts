@@ -11,8 +11,18 @@ export class CollectibleBall extends GameObject {
     super(elem, width, height, x, y);
     this.type = type;
     this.value = value;
-    this.degree = Math.random() * 360;
-    this.speed = 0.05 + Math.random() * 0.08;
+    if(type === 'normal') {
+      this.degree = Math.random() * 360;
+      this.speed = 0.05 + Math.random() * 0.08;
+    } else {
+      this.degree = 0; // 보너스 공은 고정된 위치에 생성
+      this.speed = 0; // 보너스 공은 이동하지 않음
+      if (type === 'bonus') {
+        this.lifeTime = 10000; // 보너스 공은 10초 후에 사라짐
+      } else if (type === 'score') {
+        this.lifeTime = 5000; // 점수 공은 5초 후에 사라짐
+      }
+    }
     
     elem.classList.add('collectible');
     if (type === 'normal') {
