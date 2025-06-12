@@ -24,6 +24,7 @@ export class MyBall extends GameObject {
     this.x += dx;
     this.y += dy;
 
+    super.checkBounds();
     this.detectWallCollision();
     this.checkWallCollisions();
     this.checkPortalCollisions();

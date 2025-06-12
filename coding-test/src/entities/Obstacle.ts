@@ -11,26 +11,8 @@ export class Obstacle extends GameObject {
 
   update(dt: number) {
     super.update(dt);
-    this.checkBounds();
+    super.checkBounds();
     this.checkWallCollisions();
-  }
-
-  checkBounds() {
-    if (!GameManager.gameArea) return;
-    
-    const area = GameManager.gameArea;
-    const areaWidth = area.clientWidth;
-    const areaHeight = area.clientHeight;
-    const radius = this.width / 2;
-
-    if (this.x - radius <= 0 || this.x + radius >= areaWidth) {
-      this.degree = 180 - this.degree;
-      this.x = Math.max(radius, Math.min(areaWidth - radius, this.x));
-    }
-    if (this.y - radius <= 0 || this.y + radius >= areaHeight) {
-      this.degree = -this.degree;
-      this.y = Math.max(radius, Math.min(areaHeight - radius, this.y));
-    }
   }
 
   checkWallCollisions() {

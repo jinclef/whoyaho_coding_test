@@ -1,3 +1,5 @@
+import { GameManager } from "./GameManager";
+
 export abstract class GameObject {
   width = 0;
   height = 0;
@@ -41,6 +43,24 @@ export abstract class GameObject {
     this.elem.style.top = `${this.y - this.height / 2}px`;
     this.elem.style.left = `${this.x - this.width / 2}px`;
   }
+
+  checkBounds() {
+      if (!GameManager.gameArea) return;
+      
+      const area = GameManager.gameArea;
+      const areaWidth = area.clientWidth;
+      const areaHeight = area.clientHeight;
+      const radius = this.width / 2;
+  
+      if (this.x - radius <= 0 || this.x + radius >= areaWidth) {
+        this.degree = 180 - this.degree;
+        this.x = Math.max(radius, Math.min(areaWidth - radius, this.x));
+      }
+      if (this.y - radius <= 0 || this.y + radius >= areaHeight) {
+        this.degree = -this.degree;
+        this.y = Math.max(radius, Math.min(areaHeight - radius, this.y));
+      }
+    }
 
   checkCollision(other: GameObject): boolean {
     const dx = this.x - other.x;
