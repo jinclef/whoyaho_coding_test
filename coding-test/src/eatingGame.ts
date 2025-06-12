@@ -243,23 +243,25 @@ export function dropBomb() {
   }, 3000);
 }
 
-// 공들끼리 충돌 처리
-export function handleBallCollisions() {
-  const balls: { key: string, obj: GameObject }[] = [];
+// 객체들끼리 충돌 처리 (범용 함수)
+export function handleCollisions(prefixes: string[]) {
+  const objects: { key: string, obj: GameObject }[] = [];
   const handled = new Set<string>();
 
+  // 지정된 prefix들로 시작하는 객체들 수집
   for (const [key, obj] of gameObjMap.entries()) {
-    if (key.startsWith('ball_') || key.startsWith('bonus_') || key.startsWith('score_')) {
-      balls.push({ key, obj });
+    if (prefixes.some(prefix => key.startsWith(prefix))) {
+      objects.push({ key, obj });
     }
   }
 
-  for (let i = 0; i < balls.length; i++) {
-    for (let j = i + 1; j < balls.length; j++) {
-      const a = balls[i].obj;
-      const b = balls[j].obj;
+  // 모든 객체 쌍에 대해 충돌 검사
+  for (let i = 0; i < objects.length; i++) {
+    for (let j = i + 1; j < objects.length; j++) {
+      const a = objects[i].obj;
+      const b = objects[j].obj;
       
-      const pairKey = `${balls[i].key}-${balls[j].key}`;
+      const pairKey = `${objects[i].key}-${objects[j].key}`;
       
       if (handled.has(pairKey)) {
         continue;
@@ -277,6 +279,16 @@ export function handleBallCollisions() {
       }
     }
   }
+}
+
+// 공들끼리 충돌 처리
+export function handleBallCollisions() {
+  handleCollisions(['ball_']);
+}
+
+// 방해물들끼리 충돌 처리
+export function handleObstacleCollisions() {
+  handleCollisions(['obstacle_']);
 }
 
 export function separateBalls(a: GameObject, b: GameObject) {

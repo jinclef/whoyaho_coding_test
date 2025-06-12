@@ -6,7 +6,8 @@ import {
   spawnRandomBonusLetter, 
   createWalls, 
   dropBomb, 
-  handleBallCollisions, 
+  handleBallCollisions,
+  handleObstacleCollisions,
   checkCollisions, 
   updateUI, 
   showGameOver, 
@@ -159,6 +160,7 @@ function runGameLoop() {
     
     // 공들끼리 충돌 처리
     handleBallCollisions();
+    handleObstacleCollisions();
     
     // 충돌 검사
     checkCollisions();
