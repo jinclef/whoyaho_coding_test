@@ -100,9 +100,7 @@ export function createObstacles() {
   for (let i = 0; i < obstacleCount; i++) {
     const elem = document.createElement('div');
     const obstacle = new Obstacle(
-      elem,
-      25 + Math.random() * 15,
-      25 + Math.random() * 15,
+      elem, 25, 25,
       Math.random() * (areaWidth - 60) + 30,
       Math.random() * (areaHeight - 60) + 30
     );
