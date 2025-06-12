@@ -148,9 +148,9 @@ export function createWalls() {
   }
   
   // 포탈 생성 (가끔)
-  if (Math.random() < 0.4) {
-    createPortals();
-  }
+  // if (Math.random() < 0.4) {
+  //   createPortals();
+  // }
 }
 
 // 포탈 생성

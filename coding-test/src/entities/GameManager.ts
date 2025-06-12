@@ -17,7 +17,7 @@ export class GameManager {
   static gameTime = 0;
   static option1 = 0; // 1: 움직이는 공, 2: 멈춰있는 공
   static option2 = 0; // 1: 시간제한, 2: 목표달성
-  static ballsToCollect = 10;
+  static ballsToCollect = 2;
   static ballsCollected = 0;
   static bonusLetters = ['B', 'O', 'N', 'U', 'S'];
   static bonusCollected: string[] = [];
