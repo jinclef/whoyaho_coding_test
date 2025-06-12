@@ -4,8 +4,6 @@ import { GameManager } from "./GameManager";
 export class CollectibleBall extends GameObject {
   type: string;
   value: string | number;
-  moveTimer = 0;
-  moveDirection: number;
   lifeTime = 0; // 0이면 무제한
   timer = 0;
   
@@ -13,7 +11,8 @@ export class CollectibleBall extends GameObject {
     super(elem, width, height, x, y);
     this.type = type;
     this.value = value;
-    this.moveDirection = Math.random() * 360;
+    this.degree = Math.random() * 360;
+    this.speed = 0.05 + Math.random() * 0.08;
     
     elem.classList.add('collectible');
     if (type === 'normal') {
@@ -37,16 +36,6 @@ export class CollectibleBall extends GameObject {
         this.destroy();
         return;
       }
-    }
-
-    if (GameManager.option1 === 1 && this.type === 'normal') {
-      this.moveTimer += dt;
-      if (this.moveTimer > 1500) { // 더 자주 방향 변경
-        this.moveDirection = Math.random() * 360;
-        this.moveTimer = 0;
-      }
-      this.degree = this.moveDirection;
-      this.speed = 0.08; // 속도 증가
     }
     
     super.update(dt);
