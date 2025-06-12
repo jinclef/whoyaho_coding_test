@@ -2,24 +2,14 @@ import { GameObject } from "./GameObject";
 import { GameManager } from "./GameManager";
 
 export class Obstacle extends GameObject {
-  moveTimer = 0;
-  moveDirection: number;
-
   constructor(elem: HTMLElement, width: number, height: number, x: number, y: number) {
     super(elem, width, height, x, y);
     elem.classList.add('obstacle');
-    this.moveDirection = Math.random() * 360;
-    this.speed = 0.05 + Math.random() * 0.08; // 속도 증가
+    this.degree = Math.random() * 360;
+    this.speed = 0.05 + Math.random() * 0.08;
   }
 
   update(dt: number) {
-    this.moveTimer += dt;
-    if (this.moveTimer > 2000) { // 더 자주 방향 변경
-      this.moveDirection = Math.random() * 360;
-      this.moveTimer = 0;
-    }
-    this.degree = this.moveDirection;
-    
     super.update(dt);
     this.checkBounds();
     this.checkWallCollisions();
