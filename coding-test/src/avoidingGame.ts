@@ -151,7 +151,7 @@ function runGameLoop(gameArea: HTMLElement) {
 
   // 충돌 검사 (무적 상태가 아닐 때만)
   const myBall = gameObjMap.get("myBall");
-  if (!gameState.isInvincibleActive(currentTime) || !gameState.isItemInvincibleActive(currentTime)) {
+  if (!gameState.isInvincibleActive(currentTime) && !gameState.isItemInvincibleActive(currentTime)) {
     for (const [key, obj] of gameObjMap.entries()) {
       if (key.startsWith("Bomb") && myBall && checkCollision(myBall, obj)) {
         gameState.lives--;
