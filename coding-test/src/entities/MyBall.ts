@@ -2,17 +2,11 @@ import { GameObject } from "./GameObject";
 import { GameManager } from "./GameManager";
 
 export class MyBall extends GameObject {
-  constructor(
-    elem: HTMLElement,
-    width: number,
-    height: number,
-    x: number,
-    y: number
-  ) {
+  constructor(elem: HTMLElement, width: number, height: number, x: number, y: number) {
     super(elem, width, height, x, y);
-    elem.style.backgroundColor = 'red';
-    elem.style.borderRadius = '50%';
-    elem.style.border = '3px solid darkred';
+    elem.id = "my-ball"; // id 설정
+    elem.style.width = `${width}px`;
+    elem.style.height = `${height}px`;
     elem.style.zIndex = '100';
   }
 
@@ -20,41 +14,21 @@ export class MyBall extends GameObject {
 
   update(dt: number) {
     const radian = GameObject.getRadianDegree(this.degree);
-    const dx = Math.cos(radian) * this.speed * dt * 0.3; // 속도 낮춤
-    const dy = Math.sin(radian) * this.speed * dt * 0.3;
+    const dx = Math.cos(radian) * this.speed * dt * 0.5; // 속도 낮춤
+    const dy = Math.sin(radian) * this.speed * dt * 0.5;
 
-    this.x += dx;
-    this.y += dy;
+    this.leftTopX += dx;
+    this.leftTopY += dy;
 
-    super.checkBounds();
-    this.detectWallCollision();
+    // super.checkBounds();
+    super.detectAreaCollision();
     this.checkWallCollisions();
     this.checkPortalCollisions();
     this.render();
   }
 
-  detectWallCollision() {
-    if (!GameManager.gameArea) return;
-    
-    const area = GameManager.gameArea;
-    const areaWidth = area.clientWidth;
-    const areaHeight = area.clientHeight;
-    const radius = this.width / 2;
 
-    if (this.x - radius <= 0) {
-      this.x = radius;
-    } else if (this.x + radius >= areaWidth) {
-      this.x = areaWidth - radius;
-    }
-
-    if (this.y - radius <= 0) {
-      this.y = radius;
-    } else if (this.y + radius >= areaHeight) {
-      this.y = areaHeight - radius;
-    }
-  }
-
-  checkWallCollisions() {
+  checkWallCollisions() { // TODO: refactor
     if (!GameManager.gameArea) return;
     
     const radius = this.width / 2;
@@ -72,10 +46,10 @@ export class MyBall extends GameObject {
       const wallBottom = wallTop + wallRect.height;
       
       // 공의 경계 박스
-      const ballLeft = this.x - radius;
-      const ballRight = this.x + radius;
-      const ballTop = this.y - radius;
-      const ballBottom = this.y + radius;
+      const ballLeft = this.leftTopX - radius;
+      const ballRight = this.leftTopX + radius;
+      const ballTop = this.leftTopY - radius;
+      const ballBottom = this.leftTopY + radius;
       
       // 충돌 검사 및 위치 보정
       if (ballRight > wallLeft && ballLeft < wallRight &&
@@ -90,13 +64,13 @@ export class MyBall extends GameObject {
         const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
         
         if (minOverlap === overlapLeft) {
-          this.x = wallLeft - radius;
+          this.leftTopX = wallLeft - radius;
         } else if (minOverlap === overlapRight) {
-          this.x = wallRight + radius;
+          this.leftTopX = wallRight + radius;
         } else if (minOverlap === overlapTop) {
-          this.y = wallTop - radius;
+          this.leftTopY = wallTop - radius;
         } else {
-          this.y = wallBottom + radius;
+          this.leftTopY = wallBottom + radius;
         }
       }
     });
@@ -119,7 +93,7 @@ export class MyBall extends GameObject {
       const portalX = portalRect.left - gameAreaRect.left + portalRect.width / 2;
       const portalY = portalRect.top - gameAreaRect.top + portalRect.height / 2;
 
-      const distance = Math.sqrt((this.x - portalX) ** 2 + (this.y - portalY) ** 2);
+      const distance = Math.sqrt((this.leftTopX - portalX) ** 2 + (this.leftTopY - portalY) ** 2);
 
       if (distance < radius + 20) {
         // 현재 포탈 제외하고 다른 포탈들 중 하나로 이동
@@ -130,12 +104,12 @@ export class MyBall extends GameObject {
         const targetY = targetRect.top - gameAreaRect.top + targetRect.height / 2;
 
         // 이동 후 중심에서 조금 벗어나게
-        const dx = this.x - portalX;
-        const dy = this.y - portalY;
+        const dx = this.leftTopX - portalX;
+        const dy = this.leftTopY - portalY;
         const moveAngle = Math.atan2(dy, dx);
         const offset = radius + 25;
-        this.x = targetX + Math.cos(moveAngle) * offset;
-        this.y = targetY + Math.sin(moveAngle) * offset;
+        this.leftTopX = targetX + Math.cos(moveAngle) * offset;
+        this.leftTopY = targetY + Math.sin(moveAngle) * offset;
 
         this.lastTeleportedTime = now;
         break;

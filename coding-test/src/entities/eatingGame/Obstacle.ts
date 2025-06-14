@@ -1,5 +1,5 @@
-import { GameObject } from "./GameObject";
-import { GameManager } from "./GameManager";
+import { GameObject } from "../GameObject";
+import { GameManager } from "../GameManager";
 
 export class Obstacle extends GameObject {
   constructor(elem: HTMLElement, width: number, height: number, x: number, y: number) {
@@ -11,11 +11,11 @@ export class Obstacle extends GameObject {
 
   update(dt: number) {
     super.update(dt);
-    super.checkBounds();
+    super.detectAreaCollision();
     this.checkWallCollisions();
   }
 
-  checkWallCollisions() {
+  checkWallCollisions() { // 장애물 벽 충돌 감지
     if (!GameManager.gameArea) return;
     
     const radius = this.width / 2;
@@ -32,10 +32,10 @@ export class Obstacle extends GameObject {
       const wallRight = wallLeft + wallRect.width;
       const wallBottom = wallTop + wallRect.height;
       
-      const ballLeft = this.x - radius;
-      const ballRight = this.x + radius;
-      const ballTop = this.y - radius;
-      const ballBottom = this.y + radius;
+      const ballLeft = this.leftTopX - radius;
+      const ballRight = this.leftTopX + radius;
+      const ballTop = this.leftTopY - radius;
+      const ballBottom = this.leftTopY + radius;
       
       if (ballRight > wallLeft && ballLeft < wallRight &&
           ballBottom > wallTop && ballTop < wallBottom) {
@@ -48,16 +48,16 @@ export class Obstacle extends GameObject {
         const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
         
         if (minOverlap === overlapLeft) {
-          this.x = wallLeft - radius;
+          this.leftTopX = wallLeft - radius;
           this.degree = 180 - this.degree;
         } else if (minOverlap === overlapRight) {
-          this.x = wallRight + radius;
+          this.leftTopX = wallRight + radius;
           this.degree = 180 - this.degree;
         } else if (minOverlap === overlapTop) {
-          this.y = wallTop - radius;
+          this.leftTopY = wallTop - radius;
           this.degree = -this.degree;
         } else {
-          this.y = wallBottom + radius;
+          this.leftTopY = wallBottom + radius;
           this.degree = -this.degree;
         }
       }

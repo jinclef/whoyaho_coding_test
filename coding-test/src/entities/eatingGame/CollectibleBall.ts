@@ -1,5 +1,5 @@
-import { GameObject } from "./GameObject";
-import { GameManager } from "./GameManager";
+import { GameObject } from "../GameObject";
+import { GameManager } from "../GameManager";
 
 export class CollectibleBall extends GameObject {
   type: string;
@@ -49,31 +49,13 @@ export class CollectibleBall extends GameObject {
     }
     
     super.update(dt);
-    this.checkBounds();
+    super.detectAreaCollision();
     this.checkWallCollisions();
   }
 
   destroy() {
     if (this.elem && this.elem.parentNode) {
       this.elem.parentNode.removeChild(this.elem);
-    }
-  }
-
-  checkBounds() {
-    if (!GameManager.gameArea) return;
-    
-    const area = GameManager.gameArea;
-    const areaWidth = area.clientWidth;
-    const areaHeight = area.clientHeight;
-    const radius = this.width / 2;
-
-    if (this.x - radius <= 0 || this.x + radius >= areaWidth) {
-      this.degree = 180 - this.degree;
-      this.x = Math.max(radius, Math.min(areaWidth - radius, this.x));
-    }
-    if (this.y - radius <= 0 || this.y + radius >= areaHeight) {
-      this.degree = -this.degree;
-      this.y = Math.max(radius, Math.min(areaHeight - radius, this.y));
     }
   }
 
@@ -94,10 +76,10 @@ export class CollectibleBall extends GameObject {
       const wallRight = wallLeft + wallRect.width;
       const wallBottom = wallTop + wallRect.height;
       
-      const ballLeft = this.x - radius;
-      const ballRight = this.x + radius;
-      const ballTop = this.y - radius;
-      const ballBottom = this.y + radius;
+      const ballLeft = this.leftTopX - radius;
+      const ballRight = this.leftTopX + radius;
+      const ballTop = this.leftTopY - radius;
+      const ballBottom = this.leftTopY + radius;
       
       if (ballRight > wallLeft && ballLeft < wallRight &&
           ballBottom > wallTop && ballTop < wallBottom) {
@@ -110,16 +92,16 @@ export class CollectibleBall extends GameObject {
         const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
         
         if (minOverlap === overlapLeft) {
-          this.x = wallLeft - radius;
+          this.leftTopX = wallLeft - radius;
           this.degree = 180 - this.degree;
         } else if (minOverlap === overlapRight) {
-          this.x = wallRight + radius;
+          this.leftTopX = wallRight + radius;
           this.degree = 180 - this.degree;
         } else if (minOverlap === overlapTop) {
-          this.y = wallTop - radius;
+          this.leftTopY = wallTop - radius;
           this.degree = -this.degree;
         } else {
-          this.y = wallBottom + radius;
+          this.leftTopY = wallBottom + radius;
           this.degree = -this.degree;
         }
       }
