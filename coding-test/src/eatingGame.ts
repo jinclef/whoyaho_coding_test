@@ -418,7 +418,6 @@ export function endBonusStage() {
 export function nextStage() {
   GameManager.currentStage++;
   GameManager.ballsCollected = 0;
-  GameManager.bonusCollected = [];
   
   // 방해물 추가
   createObstacles();
