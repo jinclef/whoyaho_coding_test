@@ -11,7 +11,10 @@ import {
   checkCollisions, 
   updateUI, 
   showGameOver, 
-  endBonusStage 
+  endBonusStage, 
+  updateInfiniteBallGeneration,
+  clearInfiniteBalls,
+  nextStage
 } from "./eatingGame";
 
 let raf: number;
@@ -116,7 +119,11 @@ function runGameLoop() {
   if (GameManager.gameStatus === GameStatus.PLAYING || GameManager.isInBonusStage) {
     // 보너스 스테이지가 아닐 때만 시간 증가
     if (!GameManager.isInBonusStage) {
-      GameManager.gameTime = currentTime - GameManager.startTime;
+      if (GameManager.option2 === 1) {
+        GameManager.gameTime -= dt;
+      } else {      
+       GameManager.gameTime = currentTime - GameManager.startTime;
+      }
       
       // 보너스 글자 랜덤 스폰 (목표 달성 모드에서만)
       if (GameManager.option2 === 2 && 
@@ -177,16 +184,17 @@ function runGameLoop() {
     
     // UI 업데이트
     updateUI();
+    lastFrameTime = currentTime;
     
     // 시간 제한 모드에서 스테이지 클리어 조건
-    if (GameManager.option2 === 1 && GameManager.gameTime >= 30000) {
-      // nextStage(); // 이 함수는 eatingGame.ts에서 import 해야 함
-      GameManager.startTime = currentTime;
+    if (GameManager.option2 === 1) {
+      if(GameManager.gameTime > 1) updateInfiniteBallGeneration(dt);
+      else {
+        nextStage();
+      }
     }
   }
-  
-  lastFrameTime = currentTime;
-  
+
   if (GameManager.gameStatus === GameStatus.END) {
     showGameOver();
     return;
@@ -214,7 +222,7 @@ function restartGame() {
   if (gameArea) {
     gameArea.innerHTML = '';
   }
-  
+  clearInfiniteBalls(); 
   gameObjMap.clear();
   lastFrameTime = null;
   dt = 0;

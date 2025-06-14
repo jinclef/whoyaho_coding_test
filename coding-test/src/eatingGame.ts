@@ -35,7 +35,8 @@ export function initializeGame() {
   // 방해물 생성 (더 많이)
   createObstacles();
   
-  // 처음에는 벽 없음 - 진행 중에 생성됨
+  // 타이머 생성
+  GameManager.gameTime = GameManager.option2 === 1 ? 11000 : 0; // 시간제한 모드: 30초
   
   updateUI();
 }
@@ -119,6 +120,87 @@ export function createObstacles() {
     gameObjMap.set('attack_item', attackItem);
     gameArea.appendChild(elem);
   }
+}
+
+// 시간제한 모드 무한 생성 업데이트
+export function updateInfiniteBallGeneration(dt: number) {
+  if (GameManager.option2 !== 1 || GameManager.gameTime <= 0) return;
+  
+  GameManager.ballSpawnTimer += dt;
+  
+  // 게임 진행 시간에 따른 난이도 계산
+  const timeElapsed = GameManager.gameTime / 100; // 초 단위
+  const difficultyFactor = Math.min(2.5, 1 + (timeElapsed * 0.03)); // 최대 2.5배
+  
+  // 생성 간격은 짧아지고
+  const currentSpawnInterval = GameManager.baseSpawnInterval / difficultyFactor;
+  
+  // 공 수명도 짧아짐
+  const currentBallLifeTime = GameManager.baseBallLifeTime / difficultyFactor;
+  
+  if (GameManager.ballSpawnTimer >= currentSpawnInterval) {
+    GameManager.ballSpawnTimer = 0;
+    
+    // 현재 무한 생성 공 개수 확인
+    const currentInfiniteBalls = Array.from(gameObjMap.entries())
+      .filter(([key]) => key.startsWith('infinite_ball_'))
+      .length;
+    
+    // 최대 개수 제한 (사용자가 못 느낄 정도)
+    if (currentInfiniteBalls < GameManager.maxInfiniteBalls) {
+      spawnInfiniteBall(currentBallLifeTime);
+    }
+  }
+}
+
+// 무한 생성 공 생성
+function spawnInfiniteBall(lifeTime: number) {
+  const gameArea = GameManager.gameArea;
+  if (!gameArea) return;
+  
+  const areaWidth = gameArea.clientWidth;
+  const areaHeight = gameArea.clientHeight;
+  
+  // normal 공 생성
+  const elem = document.createElement('div');
+  const ball = new CollectibleBall(
+    elem,
+    20, 20,
+    Math.random() * (areaWidth - 40) + 20,
+    Math.random() * (areaHeight - 40) + 20,
+    'normal',
+    1
+  );
+  
+  // 계산된 수명 설정
+  ball.lifeTime = lifeTime;
+  
+  // 고유 ID로 등록
+  const ballId = `infinite_ball_${GameManager.infiniteBallId++}`;
+  gameObjMap.set(ballId, ball);
+  gameArea.appendChild(elem);
+  
+  // 공이 사라질 때 맵에서 자동 제거
+  const originalDestroy = ball.destroy.bind(ball);
+  ball.destroy = function() {
+    gameObjMap.delete(ballId);
+    originalDestroy();
+  };
+}
+
+// 모든 무한 생성 공 제거 (게임 종료 시)
+export function clearInfiniteBalls() {
+  const ballsToRemove = Array.from(gameObjMap.entries())
+    .filter(([key]) => key.startsWith('infinite_ball_'));
+  
+  ballsToRemove.forEach(([key, ball]) => {
+    (ball as CollectibleBall).destroy();
+    gameObjMap.delete(key);
+  });
+  
+  // 타이머 리셋
+  GameManager.ballSpawnTimer = 0;
+  GameManager.infiniteBallId = 0;
 }
 
 // 벽 생성
@@ -418,6 +500,7 @@ export function endBonusStage() {
 export function nextStage() {
   GameManager.currentStage++;
   GameManager.ballsCollected = 0;
+  GameManager.gameTime = GameManager.option2 === 1 ? 11000 : 0; // 시간제한 모드: 11초
   
   // 방해물 추가
   createObstacles();
@@ -484,7 +567,7 @@ export function checkCollisions() {
   
   // 수집 가능한 공들과의 충돌
   gameObjMap.forEach((obj, key) => {
-    if (key.startsWith('ball_') || key.startsWith('bonus_') || key.startsWith('score_')) {
+    if (key.startsWith('ball_') || key.startsWith('bonus_') || key.startsWith('score_')|| key.startsWith('infinite_ball_')) {
       if (myBall.checkCollision(obj)) {
         const collectibleBall = obj as CollectibleBall;
         
