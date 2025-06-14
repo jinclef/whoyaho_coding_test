@@ -99,7 +99,13 @@ export function createObstacles() {
       Math.random() * (areaWidth - 60) + 30,
       Math.random() * (areaHeight - 60) + 30
     );
-    gameObjMap.set(`obstacle_${i}`, obstacle);
+      gameObjMap.set(`obstacle_${i}`, obstacle);
+    if(GameManager.isInBonusStage){
+      elem.classList.add('bonus-edible'); // 보너스 스테이지에서는 방해물을 먹을 수 있도록
+      elem.style.background = '#2ecc71'; // 보너스 스테이지 방해물 색상
+      elem.style.border = '2px solid #27ae60';
+      elem.style.animation = 'bonus-pulse 0.8s ease-in-out infinite alternate';
+    }
     gameArea.appendChild(elem);
   }
   GameManager.obstacleTotalCount += obstacleCount;
@@ -311,6 +317,107 @@ export function separateBalls(a: GameObject, b: GameObject) {
   b.y -= uy * moveDistance;
 }
 
+// // 보너스 스테이지 시작
+// export function startBonusStage() {
+//   GameManager.isInBonusStage = true;
+//   GameManager.bonusStageTimer = 15000; // 15초
+  
+//   const bonusIndicator = document.getElementById('bonus-indicator');
+//   if (bonusIndicator) {
+//     bonusIndicator.style.display = 'block';
+//     setTimeout(() => {
+//       bonusIndicator.style.display = 'none';
+//     }, 2000);
+//   }
+  
+//   // 방해물들 제거
+//   gameObjMap.forEach((obj, key) => {
+//     if (key.startsWith('obstacle_')) {
+//       if (obj.elem && obj.elem.parentNode) {
+//         obj.elem.parentNode.removeChild(obj.elem);
+//       }
+//       gameObjMap.delete(key);
+//     }
+//   });
+  
+//   // 플레이어 공 스타일 변경 (동전 스타일)
+//   const myBall = gameObjMap.get('myBall');
+//   if (myBall) {
+//     myBall.elem!.style.background = 'linear-gradient(45deg, #ffd700, #ffed4e)';
+//     myBall.elem!.style.border = '3px solid #ffa500';
+//     myBall.elem!.style.animation = 'none';
+//     myBall.elem!.style.animation = 'float 1s ease-in-out infinite';
+//   }
+  
+//   // 기존 공들 제거하고 점수 공들 생성
+//   gameObjMap.forEach((obj, key) => {
+//     if (key.startsWith('ball_') || key.startsWith('bonus_') || key.startsWith('obstacle_')) {
+//       if (obj.elem && obj.elem.parentNode) {
+//         obj.elem.parentNode.removeChild(obj.elem);
+//       }
+//       gameObjMap.delete(key);
+//     }
+//   });
+  
+//   createBonusStageItems();
+// }
+
+// // 보너스 스테이지 아이템 생성
+// export function createBonusStageItems() {
+//   const gameArea = GameManager.gameArea;
+//   if (!gameArea) return;
+  
+//   const areaWidth = gameArea.clientWidth;
+//   const areaHeight = gameArea.clientHeight;
+  
+//   const scores = [10, 20, 50, 100];
+//   const counts = [8, 5, 3, 1];
+  
+//   scores.forEach((score, index) => {
+//     for (let i = 0; i < counts[index]; i++) {
+//       const elem = document.createElement('div');
+//       const scoreBall = new CollectibleBall(
+//         elem,
+//         25, 25,
+//         Math.random() * (areaWidth - 50) + 25,
+//         Math.random() * (areaHeight - 50) + 25,
+//         'score', score
+//       );
+//       gameObjMap.set(`score_${score}_${i}`, scoreBall);
+//       gameArea.appendChild(elem);
+//     }
+//   });
+// }
+
+// // 보너스 스테이지 종료
+// export function endBonusStage() {
+//   GameManager.isInBonusStage = false;
+  
+//   // 플레이어 공 스타일 복원
+//   const myBall = gameObjMap.get('myBall');
+//   if (myBall) {
+//     myBall.elem!.style.background = 'red';
+//     myBall.elem!.style.border = '3px solid darkred';
+//     myBall.elem!.style.animation = 'none';
+//     myBall.elem!.style.opacity = '1'; // 깜빡임 효과 제거
+//   }
+  
+//   // 점수 공들 제거하고 일반 공들 다시 생성
+//   gameObjMap.forEach((obj, key) => {
+//     if (key.startsWith('score_')) {
+//       if (obj.elem && obj.elem.parentNode) {
+//         obj.elem.parentNode.removeChild(obj.elem);
+//       }
+//       gameObjMap.delete(key);
+//     }
+//   });
+  
+//   // 방해물들 다시 생성
+//   createObstacles();
+  
+//   createCollectibleBalls();
+// }
+
 // 보너스 스테이지 시작
 export function startBonusStage() {
   GameManager.isInBonusStage = true;
@@ -324,13 +431,17 @@ export function startBonusStage() {
     }, 2000);
   }
   
-  // 방해물들 제거
+  // 방해물들을 먹을 수 있는 공으로 변환
   gameObjMap.forEach((obj, key) => {
     if (key.startsWith('obstacle_')) {
-      if (obj.elem && obj.elem.parentNode) {
-        obj.elem.parentNode.removeChild(obj.elem);
+      const collectibleBall = obj as CollectibleBall;
+      collectibleBall.value = 5; // 기존 1점 -> 5점으로 증가
+      if (obj.elem) {
+        obj.elem.classList.add('bonus-edible');
+        obj.elem.style.background = '#2ecc71';
+        obj.elem.style.border = '2px solid #27ae60';
+        obj.elem.style.animation = 'bonus-pulse 0.8s ease-in-out infinite alternate';
       }
-      gameObjMap.delete(key);
     }
   });
   
@@ -343,49 +454,71 @@ export function startBonusStage() {
     myBall.elem!.style.animation = 'float 1s ease-in-out infinite';
   }
   
-  // 기존 공들 제거하고 점수 공들 생성
+  // 기존 공들과 보너스 공들 제거
   gameObjMap.forEach((obj, key) => {
-    if (key.startsWith('ball_') || key.startsWith('bonus_') || key.startsWith('obstacle_')) {
+    if (key.startsWith('bonus_')) {
       if (obj.elem && obj.elem.parentNode) {
         obj.elem.parentNode.removeChild(obj.elem);
       }
       gameObjMap.delete(key);
     }
   });
-  
-  createBonusStageItems();
 }
 
-// 보너스 스테이지 아이템 생성
-export function createBonusStageItems() {
-  const gameArea = GameManager.gameArea;
-  if (!gameArea) return;
+// 보너스 스테이지 업데이트 (app.ts의 runGameLoop에서 호출)
+export function updateBonusStage(dt: number) {
+  if (!GameManager.isInBonusStage) return;
   
-  const areaWidth = gameArea.clientWidth;
-  const areaHeight = gameArea.clientHeight;
+  // 보너스 스테이지 타이머 감소
+  GameManager.bonusStageTimer -= dt;
   
-  const scores = [10, 20, 50, 100];
-  const counts = [8, 5, 3, 1];
-  
-  scores.forEach((score, index) => {
-    for (let i = 0; i < counts[index]; i++) {
-      const elem = document.createElement('div');
-      const scoreBall = new CollectibleBall(
-        elem,
-        25, 25,
-        Math.random() * (areaWidth - 50) + 25,
-        Math.random() * (areaHeight - 50) + 25,
-        'score', score
-      );
-      gameObjMap.set(`score_${score}_${i}`, scoreBall);
-      gameArea.appendChild(elem);
+  // 끝나기 3초 전부터 방해물들 깜빡이기
+  if (GameManager.bonusStageTimer <= 3000) {
+    const timeLeft = GameManager.bonusStageTimer;
+    
+    // 시간이 적을수록 더 빨리 깜빡임 (3초 -> 0.1초 간격)
+    const blinkInterval = Math.max(100, (timeLeft / 3000) * 500 + 100);
+    const shouldBlink = Math.floor(Date.now() / blinkInterval) % 2 === 0;
+    
+    gameObjMap.forEach((obj, key) => {
+      if (key.startsWith('obstacle_') && obj.elem) {
+        obj.elem.style.opacity = shouldBlink ? '0.3' : '1';
+        
+        // 시간이 1초 이하일 때는 빨간색으로 경고
+        if (timeLeft <= 1000) {
+          obj.elem.style.background = shouldBlink ? 
+            'linear-gradient(45deg, #e74c3c, #c0392b)' : 
+            'linear-gradient(45deg, #ffd700, #ffed4e)';
+        }
+      }
+    });
+    
+    // 플레이어 공도 깜빡임
+    const myBall = gameObjMap.get('myBall');
+    if (myBall) {
+      myBall.elem!.style.opacity = shouldBlink ? '0.5' : '1';
     }
-  });
+
+    // 게임 영역 전체도 살짝 깜빡임 효과
+    if (GameManager.gameArea) {
+      GameManager.gameArea.style.filter = shouldBlink ? 'brightness(0.8)' : 'brightness(1)';
+    }
+  }
+  
+  if (GameManager.bonusStageTimer <= 0) {
+    endBonusStage();
+  }
 }
 
 // 보너스 스테이지 종료
 export function endBonusStage() {
   GameManager.isInBonusStage = false;
+  GameManager.bonusCollected = [];
+  
+  // 게임 영역 전체 효과 복원
+  if (GameManager.gameArea) {
+    GameManager.gameArea.style.filter = 'brightness(1)';
+  }
   
   // 플레이어 공 스타일 복원
   const myBall = gameObjMap.get('myBall');
@@ -393,23 +526,33 @@ export function endBonusStage() {
     myBall.elem!.style.background = 'red';
     myBall.elem!.style.border = '3px solid darkred';
     myBall.elem!.style.animation = 'none';
-    myBall.elem!.style.opacity = '1'; // 깜빡임 효과 제거
+    myBall.elem!.style.opacity = '1';
   }
   
-  // 점수 공들 제거하고 일반 공들 다시 생성
+  // 방해물들을 원래 상태로 복원
   gameObjMap.forEach((obj, key) => {
-    if (key.startsWith('score_')) {
-      if (obj.elem && obj.elem.parentNode) {
-        obj.elem.parentNode.removeChild(obj.elem);
+    if (key.startsWith('obstacle_')) {
+      if (obj.elem) {
+        obj.elem.classList.remove('bonus-edible');
+        obj.elem.style.background = '#444';
+        obj.elem.style.animation = 'none';
+        obj.elem.style.opacity = '1';
       }
-      gameObjMap.delete(key);
     }
   });
   
-  // 방해물들 다시 생성
-  createObstacles();
-  
-  createCollectibleBalls();
+  // 기존 공들의 점수와 스타일 복원
+  gameObjMap.forEach((obj, key) => {
+    if (key.startsWith('ball_')) {
+      const collectibleBall = obj as CollectibleBall;
+      collectibleBall.value = 1; // 점수 원래대로
+      if (obj.elem) {
+        obj.elem.style.background = '#2ecc71';
+        obj.elem.style.border = '2px solid #27ae60';
+        obj.elem.style.animation = 'bonus-pulse 0.8s ease-in-out infinite alternate';
+      }
+    }
+  });
 }
 
 // 다음 스테이지로
@@ -478,7 +621,7 @@ export function checkCollisions() {
   
   // 수집 가능한 공들과의 충돌
   gameObjMap.forEach((obj, key) => {
-    if (key.startsWith('ball_') || key.startsWith('bonus_') || key.startsWith('score_')|| key.startsWith('infinite_ball_')) {
+    if (key.startsWith('ball_') || key.startsWith('bonus_') || key.startsWith('score_')) {
       if (myBall.checkCollision(obj)) {
         const collectibleBall = obj as CollectibleBall;
         
@@ -491,11 +634,11 @@ export function checkCollisions() {
           if (!GameManager.bonusCollected.includes(letter)) {
             GameManager.bonusCollected.push(letter);
             // 5개 모두 수집하면 보너스 스테이지 시작
-            if (GameManager.bonusCollected.length === 5) {
+            if (GameManager.bonusCollected.length === 2) {
               startBonusStage();
             }
           }
-        } else if (collectibleBall.type === 'score') {
+        } else if (collectibleBall.type === 'score') { // bonus 점수 공
           const value = typeof collectibleBall.value === 'number' ? collectibleBall.value : parseInt(collectibleBall.value.toString());
           GameManager.score += value;
         }
@@ -513,27 +656,13 @@ export function checkCollisions() {
     }
   });
   
-  // 공격 아이템과의 충돌
-  const attackItem = gameObjMap.get('attack_item');
-  if (attackItem && myBall.checkCollision(attackItem)) {
-    GameManager.hasAttackItem = true;
-    if (attackItem.elem && attackItem.elem.parentNode) {
-      attackItem.elem.parentNode.removeChild(attackItem.elem);
-    }
-    gameObjMap.delete('attack_item');
-    
-    // 플레이어 공에 아이템 표시
-    myBall.elem!.style.boxShadow = '0 0 15px #ff6b6b';
-  }
-  
   // 방해물과의 충돌
   gameObjMap.forEach((obj, key) => {
     if (key.startsWith('obstacle_')) {
       if (myBall.checkCollision(obj)) {
-        if (GameManager.hasAttackItem) {
-          // 공격 아이템으로 방해물 제거
-          GameManager.hasAttackItem = false;
-          myBall.elem!.style.boxShadow = 'none';
+        if (GameManager.isInBonusStage) {
+          // 보너스 스테이지에서는 방해물을 먹으면 점수 획득
+          GameManager.score += 10; // 방해물 점수
           if (obj.elem && obj.elem.parentNode) {
             obj.elem.parentNode.removeChild(obj.elem);
           }

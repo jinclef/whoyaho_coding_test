@@ -20,7 +20,7 @@ export class GameManager {
   static option2 = 2; // 1: 시간제한, 2: 목표달성
   static ballsToCollect = 2;
   static ballsCollected = 0;
-  static bonusLetters = ['B', 'O', 'N', 'U', 'S'];
+  static bonusLetters = ['B', 'O'];
   static bonusCollected: string[] = [];
   static isInBonusStage = false;
   static bonusStageTimer = 0;

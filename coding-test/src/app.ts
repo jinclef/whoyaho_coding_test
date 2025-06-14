@@ -157,9 +157,9 @@ function runGameLoop() {
   }
   
   // 포탈 생성
-  if (Math.random() < 0.001 && !GameManager.isInBonusStage) {
-    createPortals();
-  }
+  // if (Math.random() < 0.001 && !GameManager.isInBonusStage) {
+  //   createPortals();
+  // }
 
   // UI 업데이트
   updateUI();
