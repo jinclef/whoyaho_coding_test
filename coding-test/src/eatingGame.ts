@@ -350,7 +350,6 @@ export function startBonusStage() {
     myBall.elem!.style.background = 'linear-gradient(45deg, #ffd700, #ffed4e)';
     myBall.elem!.style.border = '3px solid #ffa500';
     myBall.elem!.style.animation = 'none';
-    myBall.elem!.style.animation = 'float 1s ease-in-out infinite';
   }
   
   // 기존 공들과 보너스 공들 제거
