@@ -11,6 +11,7 @@ export class GameManager {
   static gameStatus: GameStatus = GameStatus.READY;
   static gameArea: HTMLElement | null = null;
   static gameAreaRect: DOMRect | null = null;
+  static exitCreated = false;
   static currentStage = 1;
   static score = 0;
   static startTime = 0;
@@ -44,5 +45,6 @@ export class GameManager {
     this.bonusStageTimer = 0;
     this.hasAttackItem = false;
     this.lastBonusSpawnTime = 0;
+    this.exitCreated = false;
   }
 }

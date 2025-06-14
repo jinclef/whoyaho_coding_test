@@ -473,7 +473,7 @@ export function createExit() {
       exit.style.top = Math.random() * (areaHeight - 50) + 'px';
       break;
   }
-  
+  GameManager.exitCreated = true;
   gameArea.appendChild(exit);
 }
 
@@ -512,7 +512,7 @@ export function checkCollisions() {
         gameObjMap.delete(key);
         
         // 목표 달성 모드에서 모든 공을 먹었을 때
-        if (GameManager.option2 === 2 && GameManager.ballsCollected >= GameManager.ballsToCollect) {
+        if (!GameManager.exitCreated && GameManager.option2 === 2 && GameManager.ballsCollected >= GameManager.ballsToCollect) {
           createExit();
         }
       }
@@ -561,6 +561,7 @@ export function checkCollisions() {
     
     if (ballX >= exitRect.left && ballX <= exitRect.right &&
         ballY >= exitRect.top && ballY <= exitRect.bottom) {
+      GameManager.exitCreated = false;
       nextStage();
     }
   }
