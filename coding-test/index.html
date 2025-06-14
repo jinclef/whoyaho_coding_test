@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Whoyaho coding test</title>
-    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="styles/style.css" />
+    <link rel="stylesheet" href="styles/animation.css">
     <script src="dist/bundle.js" defer></script>
   </head>
   <body>
@@ -13,6 +14,9 @@
       <button id="start-button" class="initial-ui">공 피하기 게임</button>
       <button id="start-button-2" class="initial-ui">공 먹기 게임</button>
     </div>
-    <div id="game-area"></div>
+    <div style="position: relative; display: inline-block">
+      <div id="timer"></div>
+      <div id="game-area"></div>
+    </div>
   </body>
 </html>

@@ -1,0 +1,58 @@
+@keyframes itemFloat {
+  0% { transform: translateY(0px) scale(1); }
+  100% { transform: translateY(-10px) scale(1.1); }
+}
+
+@keyframes effectNotification {
+  0% { 
+    transform: scale(0) translateY(-50px);
+    opacity: 0;
+  }
+  15% { 
+    transform: scale(1.2) translateY(0);
+    opacity: 1;
+  }
+  25% { 
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+  85% { 
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+  100% { 
+    transform: scale(0.8) translateY(-20px);
+    opacity: 0;
+  }
+}
+
+@keyframes explode {
+  0% { 
+    transform: scale(0) rotate(0deg);
+    opacity: 1;
+  }
+  50% { 
+    transform: scale(1.5) rotate(180deg);
+    opacity: 0.8;
+  }
+  100% { 
+    transform: scale(3) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes particle {
+  0% { 
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% { 
+    transform: translate(var(--dx), var(--dy)) scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes rainbow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

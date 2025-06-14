@@ -1,17 +1,9 @@
 import { GameObject } from "./GameObject";
 
 export class MyBall extends GameObject {
-  constructor(
-    elem: HTMLElement,
-    width: number,
-    height: number,
-    x: number,
-    y: number
-  ) {
+  constructor(elem: HTMLElement, width: number, height: number, x: number, y: number) {
     super(elem, width, height, x, y);
-    elem.style.backgroundColor = "red";
-    elem.style.borderRadius = "999px";
-    elem.style.position = "absolute";
+    elem.id = "my-ball"; // id 설정
     elem.style.width = `${width}px`;
     elem.style.height = `${height}px`;
   }
