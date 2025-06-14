@@ -188,6 +188,16 @@ function restartGame() {
   if (gameOverPanel) gameOverPanel.style.display = 'none';
   if (gameContainer) gameContainer.style.display = 'none';
 
+  // 게임 영역 초기화
+  const gameArea = document.getElementById('game-area');
+  if (gameArea) {
+    gameArea.innerHTML = '';
+  }
+  
+  gameObjMap.clear();
+  lastFrameTime = null;
+  dt = 0;
+  
   startGame();
 }
 
