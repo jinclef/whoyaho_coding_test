@@ -16,8 +16,8 @@ export class GameManager {
   static score = 0;
   static startTime = 0;
   static gameTime = 0;
-  static option1 = 0; // 1: 움직이는 공, 2: 멈춰있는 공 // TODO: refactor
-  static option2 = 0; // 1: 시간제한, 2: 목표달성
+  static option1 = 1; // 1: 움직이는 공, 2: 멈춰있는 공 // TODO: refactor
+  static option2 = 2; // 1: 시간제한, 2: 목표달성
   static ballsToCollect = 2;
   static ballsCollected = 0;
   static bonusLetters = ['B', 'O', 'N', 'U', 'S'];

@@ -12,35 +12,12 @@ import {
   updateUI, 
   showGameOver, 
   endBonusStage, 
-  updateInfiniteBallGeneration,
-  clearInfiniteBalls,
   nextStage
 } from "./eatingGame";
 
 let raf: number;
 let lastFrameTime: null | number = null;
 let dt = 0;
-
-// 옵션 선택
-function selectOption(optionGroup: number, value: number) {
-  if (optionGroup === 1) {
-    GameManager.option1 = value;
-    const opt1_1 = document.getElementById('opt1-1');
-    const opt1_2 = document.getElementById('opt1-2');
-    if (opt1_1) opt1_1.classList.toggle('selected', value === 1);
-    if (opt1_2) opt1_2.classList.toggle('selected', value === 2);
-  } else {
-    GameManager.option2 = value;
-    const opt2_1 = document.getElementById('opt2-1');
-    const opt2_2 = document.getElementById('opt2-2');
-    if (opt2_1) opt2_1.classList.toggle('selected', value === 1);
-    if (opt2_2) opt2_2.classList.toggle('selected', value === 2);
-  }
-  
-  const canStart = GameManager.option1 > 0 && GameManager.option2 > 0;
-  const startBtn = document.getElementById('final-start-btn') as HTMLButtonElement;
-  if (startBtn) startBtn.disabled = !canStart;
-}
 
 // 게임 시작
 function startGame() {
@@ -118,82 +95,69 @@ function runGameLoop() {
   
   if (GameManager.gameStatus === GameStatus.PLAYING || GameManager.isInBonusStage) {
     // 보너스 스테이지가 아닐 때만 시간 증가
-    if (!GameManager.isInBonusStage) {
-      if (GameManager.option2 === 1) {
-        GameManager.gameTime -= dt;
-      } else {      
-       GameManager.gameTime = currentTime - GameManager.startTime;
-      }
-      
-      // 보너스 글자 랜덤 스폰 (목표 달성 모드에서만)
-      if (GameManager.option2 === 2 && 
-          currentTime - GameManager.lastBonusSpawnTime > GameManager.bonusSpawnInterval) {
-        spawnRandomBonusLetter();
-        GameManager.lastBonusSpawnTime = currentTime;
-        GameManager.bonusSpawnInterval = 3000 + Math.random() * 4000; // 3-7초 간격
-      }
+    if (!GameManager.isInBonusStage) {    
+      GameManager.gameTime = currentTime - GameManager.startTime;
     }
-    
-    // 보너스 스테이지 타이머
-    if (GameManager.isInBonusStage) {
-      GameManager.bonusStageTimer -= dt;
       
-      // 보너스 스테이지 끝나기 3초 전부터 깜빡임
-      const myBall = gameObjMap.get('myBall');
-      if (GameManager.bonusStageTimer <= 3000 && myBall) {
-        const blinkInterval = 300; // 0.3초마다 깜빡임
-        const shouldBlink = Math.floor(GameManager.bonusStageTimer / blinkInterval) % 2 === 0;
-        myBall.elem!.style.opacity = shouldBlink ? '0.3' : '1';
-      }
-      
-      if (GameManager.bonusStageTimer <= 0) {
-        endBonusStage();
-      }
-    }
-    
-    // 게임 오브젝트 업데이트
-    gameObjMap.forEach(obj => {
-      obj.update(dt);
-    });
-    
-    // 보너스 공 수명 관리 (gameObjMap에서 제거된 것들 정리)
-    const keysToDelete: string[] = [];
-    gameObjMap.forEach((obj, key) => {
-      if (key.startsWith('bonus_') && obj.elem && !obj.elem.parentNode) {
-        keysToDelete.push(key);
-      }
-    });
-    keysToDelete.forEach(key => gameObjMap.delete(key));
-    
-    // 공들끼리 충돌 처리
-    handleBallCollisions();
-    handleObstacleCollisions();
-    
-    // 충돌 검사
-    checkCollisions();
-    
-    // 진행 중에 벽 생성 (5-10초마다) - 보너스 스테이지가 아닐 때만
-    // if (Math.random() < 0.0002 && !GameManager.isInBonusStage) {
-    //   createWalls();
-    // }
-    
-    // 랜덤 이벤트들 - 보너스 스테이지가 아닐 때만
-    if (Math.random() < 0.0001 && !GameManager.isInBonusStage) {
-      dropBomb();
-    }
-    
-    // UI 업데이트
-    updateUI();
-    lastFrameTime = currentTime;
-    
-    // 시간 제한 모드에서 스테이지 클리어 조건
-    if (GameManager.option2 === 1) {
-      if(GameManager.gameTime > 1) updateInfiniteBallGeneration(dt);
-      else {
-        nextStage();
-      }
+    // 보너스 글자 랜덤 스폰 (목표 달성 모드에서만)
+    if (currentTime - GameManager.lastBonusSpawnTime > GameManager.bonusSpawnInterval) {
+      spawnRandomBonusLetter();
+      GameManager.lastBonusSpawnTime = currentTime;
+      GameManager.bonusSpawnInterval = 3000 + Math.random() * 4000; // 3-7초 간격
     }
   }
+    
+  // 보너스 스테이지 타이머
+  if (GameManager.isInBonusStage) {
+    GameManager.bonusStageTimer -= dt;
+    
+    // 보너스 스테이지 끝나기 3초 전부터 깜빡임
+    const myBall = gameObjMap.get('myBall');
+    if (GameManager.bonusStageTimer <= 3000 && myBall) {
+      const blinkInterval = 300; // 0.3초마다 깜빡임
+      const shouldBlink = Math.floor(GameManager.bonusStageTimer / blinkInterval) % 2 === 0;
+      myBall.elem!.style.opacity = shouldBlink ? '0.3' : '1';
+    }
+    
+    if (GameManager.bonusStageTimer <= 0) {
+      endBonusStage();
+    }
+  }
+  
+  // 게임 오브젝트 업데이트
+  gameObjMap.forEach(obj => {
+    obj.update(dt);
+  });
+  
+  // 보너스 공 수명 관리 (gameObjMap에서 제거된 것들 정리)
+  const keysToDelete: string[] = [];
+  gameObjMap.forEach((obj, key) => {
+    if (key.startsWith('bonus_') && obj.elem && !obj.elem.parentNode) {
+      keysToDelete.push(key);
+    }
+  });
+  keysToDelete.forEach(key => gameObjMap.delete(key));
+  
+  // 공들끼리 충돌 처리
+  handleBallCollisions();
+  handleObstacleCollisions();
+  
+  // 충돌 검사
+  checkCollisions();
+  
+  // 진행 중에 벽 생성 (5-10초마다) - 보너스 스테이지가 아닐 때만
+  // if (Math.random() < 0.0002 && !GameManager.isInBonusStage) {
+  //   createWalls();
+  // }
+  
+  // 랜덤 이벤트들 - 보너스 스테이지가 아닐 때만
+  if (Math.random() < 0.0001 && !GameManager.isInBonusStage) {
+    dropBomb();
+  }
+    
+  // UI 업데이트
+  updateUI();
+  lastFrameTime = currentTime;
 
   if (GameManager.gameStatus === GameStatus.END) {
     showGameOver();
@@ -222,7 +186,6 @@ function restartGame() {
   if (gameArea) {
     gameArea.innerHTML = '';
   }
-  clearInfiniteBalls(); 
   gameObjMap.clear();
   lastFrameTime = null;
   dt = 0;
@@ -250,22 +213,12 @@ function goHome() {
     gameArea.innerHTML = '';
   }
   
-  // 옵션 초기화
-  GameManager.option1 = 0;
-  GameManager.option2 = 0;
-  document.querySelectorAll('.option-btn').forEach(btn => {
-    btn.classList.remove('selected');
-  });
-  const finalStartBtn = document.getElementById('final-start-btn') as HTMLButtonElement;
-  if (finalStartBtn) finalStartBtn.disabled = true;
-  
   gameObjMap.clear();
   lastFrameTime = null;
   dt = 0;
 }
 
 // 전역 함수로 등록 (HTML에서 호출하기 위해)
-(window as any).selectOption = selectOption;
 (window as any).startGame = startGame;
 (window as any).restartGame = restartGame;
 (window as any).goHome = goHome;

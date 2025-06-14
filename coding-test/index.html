@@ -9,24 +9,9 @@
 </head>
 <body>
     <h1 id="initial-title" class="initial-ui">WELCOME TO WHOYAHO</h1>
-    
-    <div class="option-selection" id="option-selection">
-        <h2>게임 설정</h2>
-        <div class="option-group">
-            <label>Option 1 - 공 타입:</label>
-            <button class="option-btn" onclick="selectOption(1, 1)" id="opt1-1">움직이는 공 먹기</button>
-            <button class="option-btn" onclick="selectOption(1, 2)" id="opt1-2">멈춰있는 공 먹기</button>
-        </div>
-        <div class="option-group">
-            <label>Option 2 - 게임 모드:</label>
-            <button class="option-btn" onclick="selectOption(2, 1)" id="opt2-1">시간 제한 - 최대한 많은 공 먹기</button>
-            <button class="option-btn" onclick="selectOption(2, 2)" id="opt2-2">목표 달성 - 빠른 탈출</button>
-        </div>
-        <button class="start-button" onclick="startGame()" id="final-start-btn" disabled>게임 시작</button>
-    </div>
 
     <div class="initial-ui">
-        <button id="show-options" class="start-button">게임 설정 및 시작</button>
+        <button id="show-options" onclick="startGame()" class="start-button">게임 설정 및 시작</button>
     </div>
 
     <div id="game-container">

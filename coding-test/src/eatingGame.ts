@@ -3,7 +3,6 @@ import { GameObject } from "./entities/GameObject";
 import { MyBall } from "./entities/MyBall";
 import { CollectibleBall } from "./entities/CollectibleBall";
 import { Obstacle } from "./entities/Obstacle";
-import { AttackItem } from "./entities/AttackItem";
 
 export const gameObjMap: Map<string, GameObject> = new Map();
 
@@ -34,10 +33,7 @@ export function initializeGame() {
   
   // 방해물 생성 (더 많이)
   createObstacles();
-  
-  // 타이머 생성
-  GameManager.gameTime = GameManager.option2 === 1 ? 11000 : 0; // 시간제한 모드: 30초
-  
+
   updateUI();
 }
 
@@ -66,7 +62,7 @@ export function createCollectibleBalls() {
 
 // 보너스 글자 랜덤 스폰
 export function spawnRandomBonusLetter() {
-  if (GameManager.option2 !== 2 || GameManager.isInBonusStage || !GameManager.gameArea) return;
+  if (GameManager.isInBonusStage || !GameManager.gameArea) return;
   
   const gameArea = GameManager.gameArea;
   const areaWidth = gameArea.clientWidth;
@@ -107,100 +103,7 @@ export function createObstacles() {
     gameArea.appendChild(elem);
   }
   GameManager.obstacleTotalCount += obstacleCount;
-  
-  // 공격 아이템 (Option 2-1에서만)
-  if (GameManager.option2 === 1 && Math.random() < 0.3) {
-    const elem = document.createElement('div');
-    const attackItem = new AttackItem(
-      elem,
-      20, 20,
-      Math.random() * (areaWidth - 40) + 20,
-      Math.random() * (areaHeight - 40) + 20
-    );
-    gameObjMap.set('attack_item', attackItem);
-    gameArea.appendChild(elem);
-  }
-}
 
-// 시간제한 모드 무한 생성 업데이트
-export function updateInfiniteBallGeneration(dt: number) {
-  if (GameManager.option2 !== 1 || GameManager.gameTime <= 0) return;
-  
-  GameManager.ballSpawnTimer += dt;
-  
-  // 게임 진행 시간에 따른 난이도 계산
-  const timeElapsed = GameManager.gameTime / 100; // 초 단위
-  const difficultyFactor = Math.min(2.5, 1 + (timeElapsed * 0.03)); // 최대 2.5배
-  
-  // 생성 간격은 짧아지고
-  const currentSpawnInterval = GameManager.baseSpawnInterval / difficultyFactor;
-  
-  // 공 수명도 짧아짐
-  const currentBallLifeTime = GameManager.baseBallLifeTime / difficultyFactor;
-  
-  if (GameManager.ballSpawnTimer >= currentSpawnInterval) {
-    GameManager.ballSpawnTimer = 0;
-    
-    // 현재 무한 생성 공 개수 확인
-    const currentInfiniteBalls = Array.from(gameObjMap.entries())
-      .filter(([key]) => key.startsWith('infinite_ball_'))
-      .length;
-    
-    // 최대 개수 제한 (사용자가 못 느낄 정도)
-    if (currentInfiniteBalls < GameManager.maxInfiniteBalls) {
-      spawnInfiniteBall(currentBallLifeTime);
-    }
-  }
-}
-
-// 무한 생성 공 생성
-function spawnInfiniteBall(lifeTime: number) {
-  const gameArea = GameManager.gameArea;
-  if (!gameArea) return;
-  
-  const areaWidth = gameArea.clientWidth;
-  const areaHeight = gameArea.clientHeight;
-  
-  // normal 공 생성
-  const elem = document.createElement('div');
-  const ball = new CollectibleBall(
-    elem,
-    20, 20,
-    Math.random() * (areaWidth - 40) + 20,
-    Math.random() * (areaHeight - 40) + 20,
-    'normal',
-    1
-  );
-  
-  // 계산된 수명 설정
-  ball.lifeTime = lifeTime;
-  
-  // 고유 ID로 등록
-  const ballId = `infinite_ball_${GameManager.infiniteBallId++}`;
-  gameObjMap.set(ballId, ball);
-  gameArea.appendChild(elem);
-  
-  // 공이 사라질 때 맵에서 자동 제거
-  const originalDestroy = ball.destroy.bind(ball);
-  ball.destroy = function() {
-    gameObjMap.delete(ballId);
-    originalDestroy();
-  };
-}
-
-// 모든 무한 생성 공 제거 (게임 종료 시)
-export function clearInfiniteBalls() {
-  const ballsToRemove = Array.from(gameObjMap.entries())
-    .filter(([key]) => key.startsWith('infinite_ball_'));
-  
-  ballsToRemove.forEach(([key, ball]) => {
-    (ball as CollectibleBall).destroy();
-    gameObjMap.delete(key);
-  });
-  
-  // 타이머 리셋
-  GameManager.ballSpawnTimer = 0;
-  GameManager.infiniteBallId = 0;
 }
 
 // 벽 생성
@@ -491,34 +394,27 @@ export function endBonusStage() {
   // 방해물들 다시 생성
   createObstacles();
   
-  if (GameManager.option2 === 2) {
-    createCollectibleBalls();
-  }
+  createCollectibleBalls();
 }
 
 // 다음 스테이지로
 export function nextStage() {
   GameManager.currentStage++;
   GameManager.ballsCollected = 0;
-  GameManager.gameTime = GameManager.option2 === 1 ? 11000 : 0; // 시간제한 모드: 11초
+  GameManager.gameTime = 0;
   
   // 방해물 추가
   createObstacles();
   
   // 새로운 벽들 생성
   // createWalls();
-  
-  if (GameManager.option2 === 1) {
-    // 시간 제한 모드: 새로운 공들 생성
-    createCollectibleBalls();
-  } else {
-    // 목표 달성 모드: 탈출구 제거
-    const exit = document.querySelector('.exit');
-    if (exit && exit.parentNode) {
-      exit.parentNode.removeChild(exit);
-    }
-    createCollectibleBalls();
+
+  // 목표 달성 모드: 탈출구 제거
+  const exit = document.querySelector('.exit');
+  if (exit && exit.parentNode) {
+    exit.parentNode.removeChild(exit);
   }
+  createCollectibleBalls();
   
   updateUI();
 }
@@ -595,7 +491,7 @@ export function checkCollisions() {
         gameObjMap.delete(key);
         
         // 목표 달성 모드에서 모든 공을 먹었을 때
-        if (!GameManager.exitCreated && GameManager.option2 === 2 && GameManager.ballsCollected >= GameManager.ballsToCollect) {
+        if (!GameManager.exitCreated && GameManager.ballsCollected >= GameManager.ballsToCollect) {
           createExit();
         }
       }
@@ -636,7 +532,7 @@ export function checkCollisions() {
   
   // 탈출구와의 충돌
   const exit = document.querySelector('.exit');
-  if (exit && GameManager.option2 === 2 && GameManager.gameArea) {
+  if (exit && GameManager.gameArea) {
     const exitRect = exit.getBoundingClientRect();
     const gameAreaRect = GameManager.gameArea.getBoundingClientRect();
     const ballX = myBall.x + gameAreaRect.left;
@@ -665,15 +561,9 @@ export function updateUI() {
   const ballsLeft = document.getElementById('balls-left');
   const bonusTimeDisplay = document.getElementById('bonus-time-display');
   
-  if (GameManager.option2 === 1) {
-    if (timeDisplay) timeDisplay.style.display = 'block';
-    if (ballsLeft) ballsLeft.style.display = 'none';
-    if (timeElem) timeElem.textContent = Math.floor(GameManager.gameTime / 1000).toString();
-  } else {
-    if (timeDisplay) timeDisplay.style.display = 'none';
-    if (ballsLeft) ballsLeft.style.display = 'block';
-    if (ballsCountElem) ballsCountElem.textContent = (GameManager.ballsToCollect - GameManager.ballsCollected).toString();
-  }
+  if (timeDisplay) timeDisplay.style.display = 'none';
+  if (ballsLeft) ballsLeft.style.display = 'block';
+  if (ballsCountElem) ballsCountElem.textContent = (GameManager.ballsToCollect - GameManager.ballsCollected).toString();
 
   // 보너스 스테이지 시간 표시
   if (GameManager.isInBonusStage) {
