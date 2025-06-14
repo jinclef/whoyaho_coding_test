@@ -210,12 +210,14 @@ export function createPortals() {
   
   gameArea.appendChild(portal1);
   gameArea.appendChild(portal2);
+  GameManager.portalTotalCount += 1;
   
   // 포탈 자동 제거
   setTimeout(() => {
     [portal1, portal2].forEach(portal => {
       if (portal.parentNode) {
         portal.parentNode.removeChild(portal);
+        GameManager.portalTotalCount = 0;
       }
     });
   }, 8000);

@@ -31,7 +31,7 @@ export class GameManager {
   static baseBallLifeTime = 8000; // 기본 공 수명 (밀리초)
   static maxInfiniteBalls = 50; // 성능 보호용 최대 개수
   static infiniteBallId = 0; // 무한 생성 공 ID 카운터
-
+  static portalTotalCount = 0;
 
   static setGameArea(gameArea: HTMLElement) {
     this.gameArea = gameArea;
