@@ -102,8 +102,8 @@ export function createObstacles() {
       gameObjMap.set(`obstacle_${i}`, obstacle);
     if(GameManager.isInBonusStage){
       elem.classList.add('bonus-edible'); // 보너스 스테이지에서는 방해물을 먹을 수 있도록
-      elem.style.background = '#2ecc71'; // 보너스 스테이지 방해물 색상
-      elem.style.border = '2px solid #27ae60';
+      elem.style.background = 'linear-gradient(45deg, #ffd700, #ffed4e)';
+      elem.style.border = '2px solid #ffa500';
       elem.style.animation = 'bonus-pulse 0.8s ease-in-out infinite alternate';
     }
     gameArea.appendChild(elem);
@@ -337,8 +337,8 @@ export function startBonusStage() {
       collectibleBall.value = 5; // 기존 1점 -> 5점으로 증가
       if (obj.elem) {
         obj.elem.classList.add('bonus-edible');
-        obj.elem.style.background = '#2ecc71';
-        obj.elem.style.border = '2px solid #27ae60';
+        obj.elem.style.background = 'linear-gradient(45deg, #ffd700, #ffed4e)';
+        obj.elem.style.border = '2px solid #ffa500';
         obj.elem.style.animation = 'bonus-pulse 0.8s ease-in-out infinite alternate';
       }
     }
@@ -434,6 +434,8 @@ export function endBonusStage() {
       if (obj.elem) {
         obj.elem.classList.remove('bonus-edible');
         obj.elem.style.background = '#444';
+        obj.elem.style.border = '';
+        obj.elem.style.borderRadius = '50%';
         obj.elem.style.animation = 'none';
         obj.elem.style.opacity = '1';
       }
