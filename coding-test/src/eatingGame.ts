@@ -132,11 +132,6 @@ export function createWalls() {
       }
     }, 5000 + Math.random() * 5000);
   }
-  
-  // 포탈 생성 (가끔)
-  // if (Math.random() < 0.4) {
-  //   createPortals();
-  // }
 }
 
 // 포탈 생성

@@ -12,7 +12,8 @@ import {
   updateUI, 
   showGameOver, 
   endBonusStage, 
-  nextStage
+  nextStage,
+  createPortals
 } from "./eatingGame";
 
 let raf: number;
@@ -146,15 +147,20 @@ function runGameLoop() {
   checkCollisions();
   
   // 진행 중에 벽 생성 (5-10초마다) - 보너스 스테이지가 아닐 때만
-  // if (Math.random() < 0.0002 && !GameManager.isInBonusStage) {
-  //   createWalls();
-  // }
+  if (Math.random() < 0.0002 && !GameManager.isInBonusStage) {
+    createWalls();
+  }
   
   // 랜덤 이벤트들 - 보너스 스테이지가 아닐 때만
-  if (Math.random() < 0.0001 && !GameManager.isInBonusStage) {
+  if (Math.random() < 0.001 && !GameManager.isInBonusStage) {
     dropBomb();
   }
-    
+  
+  // 포탈 생성
+  if (Math.random() < 0.001 && !GameManager.isInBonusStage) {
+    createPortals();
+  }
+
   // UI 업데이트
   updateUI();
   lastFrameTime = currentTime;
@@ -167,28 +173,22 @@ function runGameLoop() {
   raf = requestAnimationFrame(runGameLoop);
 }
 
-// 게임 재시작
 function restartGame() {
   if (raf) {
     cancelAnimationFrame(raf);
   }
   
+  GameManager.reset();
+  GameManager.gameStatus = GameStatus.PLAYING;
+  GameManager.startTime = Date.now();
+  
   const gameOverPanel = document.getElementById('game-over-panel');
   const gameContainer = document.getElementById('game-container');
-  const optionSelection = document.getElementById('option-selection');
   
   if (gameOverPanel) gameOverPanel.style.display = 'none';
   if (gameContainer) gameContainer.style.display = 'none';
-  if (optionSelection) optionSelection.style.display = 'block';
-  
-  // 게임 영역 초기화
-  const gameArea = document.getElementById('game-area');
-  if (gameArea) {
-    gameArea.innerHTML = '';
-  }
-  gameObjMap.clear();
-  lastFrameTime = null;
-  dt = 0;
+
+  startGame();
 }
 
 // 홈으로 가기
@@ -231,10 +231,6 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.initial-ui').forEach(ui => {
         (ui as HTMLElement).style.display = 'none';
       });
-      const optionSelection = document.getElementById('option-selection');
-      if (optionSelection) {
-        optionSelection.style.display = 'block';
-      }
     });
   }
 });
