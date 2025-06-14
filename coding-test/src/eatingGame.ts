@@ -93,9 +93,9 @@ export function createObstacles() {
   
   const areaWidth = gameArea.clientWidth;
   const areaHeight = gameArea.clientHeight;
-  const obstacleCount = 4 + (GameManager.currentStage * 2); // 방해물 더 많이
-  
-  for (let i = 0; i < obstacleCount; i++) {
+  const obstacleCount = (GameManager.currentStage * 2); // 방해물 더 많이
+  const obstacleTotalCount = GameManager.obstacleTotalCount;
+  for (let i = obstacleTotalCount; i < obstacleTotalCount+obstacleCount; i++) {
     const elem = document.createElement('div');
     const obstacle = new Obstacle(
       elem, 25, 25,
@@ -105,6 +105,7 @@ export function createObstacles() {
     gameObjMap.set(`obstacle_${i}`, obstacle);
     gameArea.appendChild(elem);
   }
+  GameManager.obstacleTotalCount += obstacleCount;
   
   // 공격 아이템 (Option 2-1에서만)
   if (GameManager.option2 === 1 && Math.random() < 0.3) {
@@ -423,7 +424,7 @@ export function nextStage() {
   createObstacles();
   
   // 새로운 벽들 생성
-  createWalls();
+  // createWalls();
   
   if (GameManager.option2 === 1) {
     // 시간 제한 모드: 새로운 공들 생성

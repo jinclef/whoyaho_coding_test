@@ -16,7 +16,7 @@ export class GameManager {
   static score = 0;
   static startTime = 0;
   static gameTime = 0;
-  static option1 = 0; // 1: 움직이는 공, 2: 멈춰있는 공
+  static option1 = 0; // 1: 움직이는 공, 2: 멈춰있는 공 // TODO: refactor
   static option2 = 0; // 1: 시간제한, 2: 목표달성
   static ballsToCollect = 2;
   static ballsCollected = 0;
@@ -27,6 +27,7 @@ export class GameManager {
   static hasAttackItem = false;
   static lastBonusSpawnTime = 0;
   static bonusSpawnInterval = 5000; // 5초마다 스폰
+  static obstacleTotalCount = 0;
 
   static setGameArea(gameArea: HTMLElement) {
     this.gameArea = gameArea;

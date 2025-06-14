@@ -166,9 +166,9 @@ function runGameLoop() {
     checkCollisions();
     
     // 진행 중에 벽 생성 (5-10초마다) - 보너스 스테이지가 아닐 때만
-    if (Math.random() < 0.0002 && !GameManager.isInBonusStage) {
-      createWalls();
-    }
+    // if (Math.random() < 0.0002 && !GameManager.isInBonusStage) {
+    //   createWalls();
+    // }
     
     // 랜덤 이벤트들 - 보너스 스테이지가 아닐 때만
     if (Math.random() < 0.0001 && !GameManager.isInBonusStage) {
