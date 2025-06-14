@@ -227,7 +227,6 @@ body {
     gap: 30px;
     align-items: center;
     justify-content: center;
-    animation: rainbow 2s linear infinite;
     box-shadow: 0 0 20px rgba(255,255,255,0.6);
 }
 
