@@ -53,7 +53,7 @@ export function createCollectibleBalls() {
       20, 20,
       Math.random() * (areaWidth - 40) + 20,
       Math.random() * (areaHeight - 40) + 20,
-      'normal', 1
+      'normal', GameManager.currentStage * 2
     );
     gameObjMap.set(`ball_${i}`, ball);
     gameArea.appendChild(elem);
@@ -141,7 +141,7 @@ export function createObstacles() {
     
     gameArea.appendChild(elem);
   }
-  
+
   GameManager.obstacleTotalCount += obstacleCount;
 
 }
@@ -567,8 +567,7 @@ export function checkCollisions() {
           const letter = collectibleBall.value.toString();
           if (!GameManager.bonusCollected.includes(letter)) {
             GameManager.bonusCollected.push(letter);
-            // 5개 모두 수집하면 보너스 스테이지 시작
-            if (GameManager.bonusCollected.length === 2) {
+            if (GameManager.bonusCollected.length === GameManager.bonusLetters.length) { // 모든 보너스 글자를 모았을 때
               startBonusStage();
             }
           }
