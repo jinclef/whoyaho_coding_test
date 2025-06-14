@@ -193,9 +193,12 @@ body {
   position: absolute;
 }
 
+
 #my-ball.invincible {
   background: conic-gradient(#ff0000, #ff8000, #ffff00, #00ff00, #0080ff, #8000ff, #ff0080, #ff0000);
   background-size: 100% 100%;
+  animation: rainbow 2s linear infinite;
+  box-shadow: 0 0 20px rgba(255,255,255,0.6);
 }
 
 .initial-ui {
@@ -224,6 +227,8 @@ body {
     gap: 30px;
     align-items: center;
     justify-content: center;
+    animation: rainbow 2s linear infinite;
+    box-shadow: 0 0 20px rgba(255,255,255,0.6);
 }
 
 .bonus-letters {

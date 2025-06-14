@@ -90,4 +90,7 @@ export abstract class GameObject {
       }
     }
   }
+
+  render(): void {
+  }
 }
