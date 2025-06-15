@@ -1,4 +1,4 @@
-import { GameManager } from "./GameManager";
+import { BallType } from "./BallSpawner";
 
 export abstract class GameObject {
   width = 0;
@@ -9,17 +9,7 @@ export abstract class GameObject {
   degree = 0;
   elem: null | HTMLElement = null;
 
-  static getRadianDegree(degree: number) {
-    return (degree * Math.PI) / 180;
-  }
-
-  constructor(
-    elem: HTMLElement,
-    width: number,
-    height: number,
-    x: number,
-    y: number
-  ) {
+  constructor(elem: HTMLElement, width: number, height: number, x: number, y: number) {
     this.elem = elem;
     this.width = width;
     this.height = height;
@@ -29,10 +19,11 @@ export abstract class GameObject {
   }
 
   update(dt: number) {
-    const dx = this.speed * dt * Math.cos(GameObject.getRadianDegree(this.degree));
-    const dy = this.speed * dt * Math.sin(GameObject.getRadianDegree(this.degree));
+    const dx = this.speed * dt * Math.cos((this.degree * Math.PI) / 180);
+    const dy = this.speed * dt * Math.sin((this.degree * Math.PI) / 180);
     this.leftTopX += dx;
     this.leftTopY += dy;
+    this.detectAreaCollision();
     this.render();
   }
 
@@ -51,6 +42,8 @@ export abstract class GameObject {
     const areaHeight = area.clientHeight;
     
     const randomAngle = () => (Math.random() - 0.5) * 10; // -5도 ~ +5도 흔들림
+
+    if (!this.elem) return;
 
     // 좌우
     if (this.leftTopX <= 0) {

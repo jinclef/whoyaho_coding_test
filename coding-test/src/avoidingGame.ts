@@ -1,7 +1,7 @@
-import { GameManager, GameStatus } from "./entities/GameManager";
+import { GameManager, GameMode, GameStatus } from "./entities/GameManager";
 import { GameObject } from "./entities/GameObject";
 import { MyBall } from "./entities/MyBall";
-import { spawnBall, BallType } from "./entities/avoidingGame/BallSpawner";
+import { spawnBall, BallType } from "./entities/BallSpawner";
 import { registerKeyboardEvent, updateTimerDisplay, checkCollision } from "./utils/gameUtils";
 import { Item, ItemType } from "./entities/avoidingGame/Item";
 import { EffectDisplay } from "./utils/effectUI";
@@ -45,6 +45,7 @@ class GameState {
     return currentTime < this.itemInvincibleEndTime;
   }
 }
+
 // 전역 변수들
 let raf: number;
 let lastFrameTime: null | number = null;
@@ -87,6 +88,7 @@ export function startAvoidingGame() {
   document.body.appendChild(scoreDisplay);
 
   GameManager.setGameArea(gameArea);
+  GameManager.gameMode = GameMode.AVOIDING;
   const boundingRect = gameArea.getBoundingClientRect();
 
   const myBallElem = document.createElement('div');
@@ -168,7 +170,7 @@ function runGameLoop(gameArea: HTMLElement) {
   } else if(gameState.isItemInvincibleActive(currentTime) ) {
     // 아이템 무적 상태일 때 충돌하면 많은 점수 획득
     const timeSinceLast = currentTime - lastInvincibleCollisionTime;
-    if (timeSinceLast > 300) {  // 0.3초 동안 효과 1번만 출력
+    if (timeSinceLast > 500) {  // 0.5초 동안 효과 1번만 출력
       const collidedBombs = [];
 
       for (const [key, obj] of gameObjMap.entries()) {

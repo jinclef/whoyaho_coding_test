@@ -1,10 +1,11 @@
 
-import { GameManager, GameStatus } from "./entities/GameManager";
+import { GameManager, GameMode, GameStatus } from "./entities/GameManager";
 import { MyBall } from "./entities/MyBall";
 import { checkCollision, registerKeyboardEvent } from "./utils/gameUtils";
 import { GameObject } from "./entities/GameObject";
-import { CollectibleBall } from "./entities/eatingGame/CollectibleBall";
-import { Obstacle } from "./entities/eatingGame/Obstacle";
+import { CollectibleBall } from "./entities/GameBall";
+import { Obstacle } from "./entities/GameBall";
+import { BallType, spawnBall } from "./entities/BallSpawner";
 
 let raf: number;
 let lastFrameTime: null | number = null;
@@ -30,6 +31,7 @@ export function startEatingGame() {
   GameManager.reset();
   gameObjMap.clear();
 	GameManager.setGameArea(gameArea);
+  GameManager.gameMode = GameMode.AVOIDING;
   
 	const boundingRect = gameArea.getBoundingClientRect();
   GameManager.gameStatus = GameStatus.PLAYING;
@@ -48,7 +50,7 @@ export function startEatingGame() {
 	gameArea.appendChild(myBallElem);
 		
 	// 수집 가능한 공들 생성
-	createCollectibleBalls();
+	for (let i = 0; i < GameManager.ballsToCollect; i++) spawnBall(BallType.Normal, gameArea, gameObjMap);
 	
 	// 방해물 생성 (더 많이)
 	createObstacles();
@@ -74,7 +76,8 @@ function runGameLoop() {
       
     // 보너스 글자 랜덤 스폰 (목표 달성 모드에서만)
     if (currentTime - GameManager.lastBonusSpawnTime > GameManager.bonusSpawnInterval) {
-      spawnRandomBonusLetter();
+      // spawnRandomBonusLetter();
+			spawnBall(BallType.Bonus, GameManager.gameArea!, gameObjMap);
       GameManager.lastBonusSpawnTime = currentTime;
       GameManager.bonusSpawnInterval = 3000 + Math.random() * 4000; // 3-7초 간격
     }
@@ -105,7 +108,7 @@ function runGameLoop() {
   // 보너스 공 수명 관리 (gameObjMap에서 제거된 것들 정리)
   const keysToDelete: string[] = [];
   gameObjMap.forEach((obj, key) => {
-    if (key.startsWith('bonus_') && obj.elem && !obj.elem.parentNode) {
+    if (key.startsWith('Bonus-') && obj.elem && !obj.elem.parentNode) {
       keysToDelete.push(key);
     }
   });
@@ -197,53 +200,6 @@ function goHome() {
 (window as any).restartGame = restartEatingGame;
 (window as any).goHome = goHome;
 
-
-// 수집 가능한 공들 생성
-export function createCollectibleBalls() {
-	const gameArea = GameManager.gameArea;
-	if (!gameArea) return;
-	
-	const areaWidth = gameArea.clientWidth;
-	const areaHeight = gameArea.clientHeight;
-	
-	// 일반 공들
-	for (let i = 0; i < GameManager.ballsToCollect; i++) {
-		const elem = document.createElement('div');
-		const ball = new CollectibleBall(
-			elem,
-			20, 20,
-			Math.random() * (areaWidth - 40) + 20,
-			Math.random() * (areaHeight - 40) + 20,
-			'normal', GameManager.currentStage * 2
-		);
-		gameObjMap.set(`ball_${i}`, ball);
-		gameArea.appendChild(elem);
-	}
-}
-
-// 보너스 글자 랜덤 스폰
-export function spawnRandomBonusLetter() {
-	if (GameManager.isInBonusStage || !GameManager.gameArea) return;
-	
-	const gameArea = GameManager.gameArea;
-	const areaWidth = gameArea.clientWidth;
-	const areaHeight = gameArea.clientHeight;
-	
-	const randomLetter = GameManager.bonusLetters[Math.floor(Math.random() * GameManager.bonusLetters.length)];
-	const elem = document.createElement('div');
-	const bonusBall = new CollectibleBall(
-		elem,
-		25, 25,
-		Math.random() * (areaWidth - 50) + 25,
-		Math.random() * (areaHeight - 50) + 25,
-		'bonus', randomLetter
-	);
-	bonusBall.timer = 0;
-	
-	gameObjMap.set(`bonus_${randomLetter}_${Date.now()}`, bonusBall);
-	gameArea.appendChild(elem);
-}
-
 // 방해물 생성
 export function createObstacles() {
 	const gameArea = GameManager.gameArea;
@@ -291,7 +247,7 @@ export function createObstacles() {
 		
 		const elem = document.createElement('div');
 		const obstacle = new Obstacle(elem, 25, 25, x, y);
-		gameObjMap.set(`obstacle_${i}`, obstacle);
+		gameObjMap.set(`Obstacle-${i}`, obstacle);
 		
 		if (GameManager.isInBonusStage) {
 			elem.classList.add('bonus-edible');
@@ -452,12 +408,12 @@ export function handleCollisions(prefixes: string[]) {
 
 // 공들끼리 충돌 처리
 export function handleBallCollisions() {
-	handleCollisions(['ball_']);
+	handleCollisions(['Normal-', 'Bonus-']);
 }
 
 // 방해물들끼리 충돌 처리
 export function handleObstacleCollisions() {
-	handleCollisions(['obstacle_']);
+	handleCollisions(['Obstacle-']);
 }
 
 export function separateBalls(a: GameObject, b: GameObject) {
@@ -496,7 +452,7 @@ export function startBonusStage() {
 	
 	// 방해물들을 먹을 수 있는 공으로 변환
 	gameObjMap.forEach((obj, key) => {
-		if (key.startsWith('obstacle_')) {
+		if (key.startsWith('Obstacle-')) {
 			const collectibleBall = obj as CollectibleBall;
 			collectibleBall.value = GameManager.currentStage * 5;
 			if (obj.elem) {
@@ -518,7 +474,7 @@ export function startBonusStage() {
 	
 	// 기존 공들과 보너스 공들 제거
 	gameObjMap.forEach((obj, key) => {
-		if (key.startsWith('bonus_')) {
+		if (key.startsWith('Bonus-')) {
 			if (obj.elem && obj.elem.parentNode) {
 				obj.elem.parentNode.removeChild(obj.elem);
 			}
@@ -574,7 +530,7 @@ export function endBonusStage() {
 	
 	// 방해물들을 원래 상태로 복원
 	gameObjMap.forEach((obj, key) => {
-		if (key.startsWith('obstacle_')) {
+		if (key.startsWith('Obstacle-')) {
 			if (obj.elem) {
 				obj.elem.classList.remove('bonus-edible');
 				obj.elem.style.background = '#444';
@@ -588,7 +544,7 @@ export function endBonusStage() {
 	
 	// 기존 공들의 점수와 스타일 복원
 	gameObjMap.forEach((obj, key) => {
-		if (key.startsWith('ball_')) {
+		if (key.startsWith('Normal-')) {
 			const collectibleBall = obj as CollectibleBall;
 			collectibleBall.value = GameManager.currentStage * 2; // 원래 점수로 복원
 			if (obj.elem) {
@@ -614,7 +570,7 @@ export function nextStage() {
 	if (exit && exit.parentNode) {
 		exit.parentNode.removeChild(exit);
 	}
-	createCollectibleBalls();
+	for (let i = 0; i < GameManager.ballsToCollect; i++) spawnBall(BallType.Normal, GameManager.gameArea!, gameObjMap);
 	
 	updateUI();
 }
@@ -660,18 +616,18 @@ export function createExit() {
 export function checkCollisions() {
 	const myBall = gameObjMap.get('myBall');
 	if (!myBall) return;
-	
+
 	// 수집 가능한 공들과의 충돌
 	gameObjMap.forEach((obj, key) => {
-		if (key.startsWith('ball_') || key.startsWith('bonus_') || key.startsWith('score_')) {
+		if (key.startsWith('Normal-') || key.startsWith('Bonus-')) {
 			if (checkCollision(myBall, obj)) {
 				const collectibleBall = obj as CollectibleBall;
-				
-				if (collectibleBall.type === 'normal') {
+				if (collectibleBall.type === BallType.Normal) {
 					const value = typeof collectibleBall.value === 'number' ? collectibleBall.value : parseInt(collectibleBall.value.toString());
 					GameManager.score += value;
 					GameManager.ballsCollected++;
-				} else if (collectibleBall.type === 'bonus') {
+				}
+				else if (collectibleBall.type === BallType.Bonus) {
 					const letter = collectibleBall.value.toString();
 					if (!GameManager.bonusCollected.includes(letter)) {
 						GameManager.bonusCollected.push(letter);
@@ -679,9 +635,6 @@ export function checkCollisions() {
 							startBonusStage();
 						}
 					}
-				} else if (collectibleBall.type === 'score') { // bonus 점수 공
-					const value = typeof collectibleBall.value === 'number' ? collectibleBall.value : parseInt(collectibleBall.value.toString());
-					GameManager.score += value;
 				}
 				
 				if (obj.elem && obj.elem.parentNode) {
@@ -689,7 +642,6 @@ export function checkCollisions() {
 				}
 				gameObjMap.delete(key);
 				
-				// 목표 달성 모드에서 모든 공을 먹었을 때
 				if (!GameManager.exitCreated && GameManager.ballsCollected >= GameManager.ballsToCollect) {
 					createExit();
 				}
@@ -699,7 +651,7 @@ export function checkCollisions() {
 	
 	// 방해물과의 충돌
 	gameObjMap.forEach((obj, key) => {
-		if (key.startsWith('obstacle_')) {
+		if (key.startsWith('Obstacle-')) {
 			if (checkCollision(myBall, obj)) {
 				if (GameManager.isInBonusStage) {
 					// 보너스 스테이지에서는 방해물을 먹으면 점수 획득

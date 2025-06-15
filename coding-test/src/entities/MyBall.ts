@@ -13,7 +13,7 @@ export class MyBall extends GameObject {
   lastTeleportedTime = 0;
 
   update(dt: number) {
-    const radian = GameObject.getRadianDegree(this.degree);
+    const radian = (this.degree * Math.PI) / 180;
     const dx = Math.cos(radian) * this.speed * dt * 0.5; // 속도 낮춤
     const dy = Math.sin(radian) * this.speed * dt * 0.5;
 

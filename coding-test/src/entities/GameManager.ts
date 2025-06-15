@@ -7,10 +7,18 @@ export enum GameStatus {
   END = 'END'
 }
 
+export enum GameMode {
+  AVOIDING = 'AVOIDING',
+  EATING = 'EATING',
+}
+
 export class GameManager {
   static gameStatus: GameStatus = GameStatus.READY;
   static gameArea: HTMLElement | null = null;
   static gameAreaRect: DOMRect | null = null;
+  static gameMode: GameMode | null = null;
+
+  //TODO: GameState로 옮겨야 함.
   static exitCreated = false;
   static currentStage = 1;
   static score = 0;

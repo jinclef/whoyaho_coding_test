@@ -308,16 +308,6 @@ body {
     text-shadow: 1px 1px 2px black;
 }
 
-.score-ball {
-    border: 2px solid #f39c12;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    text-shadow: 1px 1px 2px black;
-}
-
 .normal-ball {
     background: #2ecc71;
 }
