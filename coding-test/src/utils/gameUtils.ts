@@ -1,6 +1,7 @@
 // src/utils/gameUtils.ts
 import { MyBall } from "../entities/MyBall";
 import { GameObject } from "../entities/GameObject";
+import { GameManager } from "../entities/GameManager";
 
 export function registerKeyboardEvent(myBall: MyBall) {
   let isRightKeyDown = false;
@@ -43,11 +44,12 @@ export function updateTimerDisplay(ms: number) {
   if (timerElem) timerElem.innerText = `Time: ${sec}s`;
 }
 
+// 중심 간의 거리가 두 객체의 반지름 합보다 작거나 같으면 충돌로 간주
 export function checkCollision(a: GameObject, b: GameObject): boolean {
-  const ax = a.x + a.width / 2;
-  const ay = a.y + a.height / 2;
-  const bx = b.x + b.width / 2;
-  const by = b.y + b.height / 2;
+  const ax = a.leftTopX + a.width / 2;
+  const ay = a.leftTopY + a.height / 2;
+  const bx = b.leftTopX + b.width / 2;
+  const by = b.leftTopY + b.height / 2;
   const dx = ax - bx;
   const dy = ay - by;
   const distance = Math.sqrt(dx * dx + dy * dy);

@@ -1,22 +1,54 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Whoyaho coding test</title>
+    <title>Whoyaho 생존 게임</title>
     <link rel="stylesheet" href="styles/style.css" />
     <link rel="stylesheet" href="styles/animation.css">
     <script src="dist/bundle.js" defer></script>
-  </head>
-  <body>
+</head>
+<body>
     <h1 id="initial-title" class="initial-ui">WELCOME TO WHOYAHO</h1>
-    <div>
-      <button id="start-button" class="initial-ui">공 피하기 게임</button>
-      <button id="start-button-2" class="initial-ui">공 먹기 게임</button>
+    <div class="initial-ui">
+      <button id="start-button" class="start-button initial-ui">공 피하기 게임</button>
+      <button id="start-button-2" class="start-button initial-ui">공 먹기 게임</button>
     </div>
-    <div style="position: relative; display: inline-block">
+    
+    <div id="game-container-avoid" class="game-container-avoid">
       <div id="timer"></div>
-      <div id="game-area"></div>
+			<div id="game-area-avoid"></div>
     </div>
-  </body>
+
+    <div id="game-container-eating" class="game-container-eating">
+        <div class="game-ui" id="game-ui">
+            <div>점수: <span id="score">0</span></div>
+            <div>스테이지: <span id="stage">1</span></div>
+            <div id="time-display" style="display: none;">시간: <span id="time">0</span>초</div>
+            <div id="balls-left">남은 공: <span id="balls-count">0</span></div>
+            <div id="bonus-time-display" style="display: none;">보너스 시간: <span id="bonus-time">0</span>초</div>
+            <div class="bonus-letters">
+                보너스: 
+                <span class="bonus-letter" id="bonus-B">B</span>
+                <span class="bonus-letter" id="bonus-O">O</span>
+                <span class="bonus-letter" id="bonus-N">N</span>
+                <span class="bonus-letter" id="bonus-U">U</span>
+                <span class="bonus-letter" id="bonus-S">S</span>
+            </div>
+        </div>
+				<div id="game-area-eating"></div>
+    </div>
+
+    <div class="bonus-stage-indicator" id="bonus-indicator">
+        🎉 보너스 효과 발동! 장애물이 10초 간 먹을 수 있는 상태가 됩니다. 🎉
+    </div>
+
+    <div class="game-over-panel" id="game-over-panel">
+        <h2>게임 오버!</h2>
+        <p>최종 점수: <span id="final-score">0</span></p>
+        <p>최종 스테이지: <span id="final-stage">1</span></p>
+        <button class="end-button" onclick="restartGame()">다시 시작</button>
+        <button class="end-button" onclick="goHome()">홈으로</button>
+    </div>
+</body>
 </html>

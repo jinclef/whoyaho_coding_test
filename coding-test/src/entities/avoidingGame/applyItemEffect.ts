@@ -1,5 +1,5 @@
 import { ItemType } from "./Item";
-import { GameObject } from "./GameObject";
+import { GameObject } from "../GameObject";
 
 export function applyItemEffect(itemType: ItemType, currentTime: number, gameState: any, effectDisplay: any, gameObjMap: Map<string, GameObject>) {
   switch (itemType) {

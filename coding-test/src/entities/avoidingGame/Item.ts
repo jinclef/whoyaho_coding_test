@@ -1,4 +1,4 @@
-import { GameObject } from "./GameObject";
+import { GameObject } from "../GameObject";
 
 // 아이템 타입 정의
 enum ItemType {

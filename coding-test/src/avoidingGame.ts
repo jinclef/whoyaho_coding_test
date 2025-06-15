@@ -1,12 +1,12 @@
 import { GameManager, GameStatus } from "./entities/GameManager";
 import { GameObject } from "./entities/GameObject";
 import { MyBall } from "./entities/MyBall";
-import { spawnBall, BallType } from "./entities/BallSpawner";
+import { spawnBall, BallType } from "./entities/avoidingGame/BallSpawner";
 import { registerKeyboardEvent, updateTimerDisplay, checkCollision } from "./utils/gameUtils";
-import { Item, ItemType } from "./entities/Item";
+import { Item, ItemType } from "./entities/avoidingGame/Item";
 import { EffectDisplay } from "./utils/effectUI";
-import { spawnRandomItem } from "./entities/ItemSpawner";
-import { applyItemEffect } from "./entities/applyItemEffect";
+import { spawnRandomItem } from "./entities/avoidingGame/ItemSpawner";
+import { applyItemEffect } from "./entities/avoidingGame/applyItemEffect";
 
 // 게임 상태 관리
 class GameState {
@@ -61,8 +61,7 @@ let effectDisplay: EffectDisplay;
 
 export function startAvoidingGame() {
   const intialUis = document.querySelectorAll(".initial-ui");
-  const gameArea = document.getElementById("game-area")!;
-
+  const gameArea = document.getElementById("game-area-avoid")!;
   intialUis.forEach((ui) => {
     (ui as HTMLElement).style.display = "none";
   });
@@ -99,6 +98,8 @@ export function startAvoidingGame() {
     boundingRect.height / 2
   );
   gameObjMap.set("myBall", myBallObj);
+  console.log(boundingRect.width/2, boundingRect.height/2);
+  console.log(myBallObj.leftTopX, myBallObj.leftTopY);
 
   // initial BombBalls
   const initialBombCount = 2 + Math.floor(Math.random() * 2);
@@ -156,7 +157,7 @@ function runGameLoop(gameArea: HTMLElement) {
       if (key.startsWith("Bomb") && myBall && checkCollision(myBall, obj)) {
         gameState.lives--;
         if (gameState.lives <= 0) {
-          GameManager.GameStatus = GameStatus.END;
+          GameManager.gameStatus = GameStatus.END;
         } else {
           effectDisplay.showEffect(`라이프 -1 (남은 라이프: ${gameState.lives})`, "#ff4040");
           // 잠시 무적 상태로 만들기
@@ -174,7 +175,7 @@ function runGameLoop(gameArea: HTMLElement) {
   updateDisplays();
   lastFrameTime = currentTime;
 
-  if (GameManager.GameStatus === GameStatus.END) {
+  if (GameManager.gameStatus === GameStatus.END) {
     alert(`Game Over! 최종 점수: ${gameState.getScore().toLocaleString()}`);
     cleanup();
     setTimeout(() => location.reload(), 1000);
@@ -287,8 +288,8 @@ function handleBombBallCollisions(_effectiveDt: number) {
 }
 
 function separateBalls(a: GameObject, b: GameObject) {
-  const dx = a.x - b.x;
-  const dy = a.y - b.y;
+  const dx = a.leftTopX - b.leftTopX;
+  const dy = a.leftTopY - b.leftTopY;
   const dist = Math.hypot(dx, dy);
   
   const minDistance = (a.width + b.width) / 2;
@@ -301,8 +302,8 @@ function separateBalls(a: GameObject, b: GameObject) {
   
   const moveDistance = overlap / 2;
   
-  a.x += ux * moveDistance;
-  a.y += uy * moveDistance;
-  b.x -= ux * moveDistance;
-  b.y -= uy * moveDistance;
+  a.leftTopX += ux * moveDistance;
+  a.leftTopY += uy * moveDistance;
+  b.leftTopX -= ux * moveDistance;
+  b.leftTopY -= uy * moveDistance;
 }

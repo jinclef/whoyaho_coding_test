@@ -1,6 +1,6 @@
 // BallSpawner.ts
 import { BombBall } from "./BombBall";
-import { GameObject } from "./GameObject";
+import { GameObject } from "../GameObject";
 
 let ballIdCounter = 0;
 

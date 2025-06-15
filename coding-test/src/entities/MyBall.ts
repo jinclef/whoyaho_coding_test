@@ -1,4 +1,5 @@
 import { GameObject } from "./GameObject";
+import { GameManager } from "./GameManager";
 
 export class MyBall extends GameObject {
   constructor(elem: HTMLElement, width: number, height: number, x: number, y: number) {
@@ -6,52 +7,62 @@ export class MyBall extends GameObject {
     elem.id = "my-ball"; // id 설정
     elem.style.width = `${width}px`;
     elem.style.height = `${height}px`;
+    elem.style.zIndex = '100';
   }
 
+  lastTeleportedTime = 0;
+
   update(dt: number) {
-    const radian = (this.degree * Math.PI) / 180;
-    const dx = Math.cos(radian) * this.speed * dt * 0.5;
+    const radian = GameObject.getRadianDegree(this.degree);
+    const dx = Math.cos(radian) * this.speed * dt * 0.5; // 속도 낮춤
     const dy = Math.sin(radian) * this.speed * dt * 0.5;
 
-    this.x += dx;
-    this.y += dy;
+    this.leftTopX += dx;
+    this.leftTopY += dy;
 
-    this.detectWallCollision();
+    super.detectAreaCollision();
+    this.checkPortalCollisions();
     this.render();
   }
 
-  detectWallCollision() {
-  const ballSize = this.width;
-  const area = this.elem!.parentElement as HTMLElement;
+  checkPortalCollisions() {
+    if (!GameManager.gameArea) return;
+    const now = Date.now();
+    if (now - this.lastTeleportedTime < 1000) return; // 1초 쿨타임
 
-  const areaWidth = area.clientWidth;
-  const areaHeight = area.clientHeight;
+    const radius = this.width / 2;
+    const portals = Array.from(document.querySelectorAll('.portal'));
+    if (portals.length < 2) return;
 
-  // 좌우 벽
-  if (this.x <= 0) {
-    this.x = 0;
-    this.degree = 180 - this.degree;
+    const gameAreaRect = GameManager.gameArea.getBoundingClientRect();
 
-  } else if (this.x + ballSize >= areaWidth) {
-    this.x = areaWidth - ballSize;
-    this.degree = 180 - this.degree;
-  }
+    for (let i = 0; i < portals.length; i++) {
+      const portal = portals[i];
+      const portalRect = portal.getBoundingClientRect();
+      const portalX = portalRect.left - gameAreaRect.left + portalRect.width / 2;
+      const portalY = portalRect.top - gameAreaRect.top + portalRect.height / 2;
 
-  // 상하 벽
-  if (this.y <= 0) {
-    this.y = 0;
-    this.degree = -this.degree;
-  } else if (this.y + ballSize >= areaHeight) {
-    this.y = areaHeight - ballSize;
-    this.degree = -this.degree;
-  }
+      const distance = Math.sqrt((this.leftTopX - portalX) ** 2 + (this.leftTopY - portalY) ** 2);
 
-  // 각도는 0~360 사이로 보정
-  this.degree = (this.degree + 360) % 360;
-}
+      if (distance < radius + 20) {
+        // 현재 포탈 제외하고 다른 포탈들 중 하나로 이동
+        const otherPortals = portals.filter((_, idx) => idx !== i);
+        const targetPortal = otherPortals[Math.floor(Math.random() * otherPortals.length)];
+        const targetRect = targetPortal.getBoundingClientRect();
+        const targetX = targetRect.left - gameAreaRect.left + targetRect.width / 2;
+        const targetY = targetRect.top - gameAreaRect.top + targetRect.height / 2;
 
-  render() {
-    this.elem!.style.left = `${this.x}px`;
-    this.elem!.style.top = `${this.y}px`;
+        // 이동 후 중심에서 조금 벗어나게
+        const dx = this.leftTopX - portalX;
+        const dy = this.leftTopY - portalY;
+        const moveAngle = Math.atan2(dy, dx);
+        const offset = radius + 25;
+        this.leftTopX = targetX + Math.cos(moveAngle) * offset;
+        this.leftTopY = targetY + Math.sin(moveAngle) * offset;
+
+        this.lastTeleportedTime = now;
+        break;
+      }
+    }
   }
 }
