@@ -1,5 +1,4 @@
 import { GameObject } from "../GameObject";
-import { GameManager } from "../GameManager";
 
 export class CollectibleBall extends GameObject {
   type: string;

@@ -41,7 +41,7 @@
   }
 }
 
-@keyframes explode-bomb {
+@keyframes explode-redzone {
   0% {
     transform: scale(1);
     opacity: 1;

@@ -5,9 +5,7 @@ import { GameObject } from "../GameObject";
 let ballIdCounter = 0;
 
 export enum BallType {
-  Bomb,
-  Ice,
-  Speed,
+  Bomb
 }
 
 export function spawnBall(

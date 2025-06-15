@@ -498,7 +498,7 @@ export function startBonusStage() {
 	gameObjMap.forEach((obj, key) => {
 		if (key.startsWith('obstacle_')) {
 			const collectibleBall = obj as CollectibleBall;
-			collectibleBall.value = 5; // 기존 1점 -> 5점으로 증가
+			collectibleBall.value = GameManager.currentStage * 5;
 			if (obj.elem) {
 				obj.elem.classList.add('bonus-edible');
 				obj.elem.style.background = 'linear-gradient(45deg, #ffd700, #ffed4e)';
@@ -534,36 +534,17 @@ export function updateBonusStage(dt: number) {
 	// 보너스 스테이지 타이머 감소
 	GameManager.bonusStageTimer -= dt;
 	
-	// 끝나기 3초 전부터 방해물들 깜빡이기
+	// 끝나기 3초 전부터 깜빡이기
 	if (GameManager.bonusStageTimer <= 3000) {
 		const timeLeft = GameManager.bonusStageTimer;
 		
-		// 시간이 적을수록 더 빨리 깜빡임 (3초 -> 0.1초 간격)
 		const blinkInterval = Math.max(100, (timeLeft / 3000) * 500 + 100);
 		const shouldBlink = Math.floor(Date.now() / blinkInterval) % 2 === 0;
-		
-		gameObjMap.forEach((obj, key) => {
-			if (key.startsWith('obstacle_') && obj.elem) {
-				obj.elem.style.opacity = shouldBlink ? '0.3' : '1';
-				
-				// 시간이 1초 이하일 때는 빨간색으로 경고
-				if (timeLeft <= 1000) {
-					obj.elem.style.background = shouldBlink ? 
-						'linear-gradient(45deg, #e74c3c, #c0392b)' : 
-						'linear-gradient(45deg, #ffd700, #ffed4e)';
-				}
-			}
-		});
 		
 		// 플레이어 공도 깜빡임
 		const myBall = gameObjMap.get('myBall');
 		if (myBall) {
 			myBall.elem!.style.opacity = shouldBlink ? '0.5' : '1';
-		}
-
-		// 게임 영역 전체도 살짝 깜빡임 효과
-		if (GameManager.gameArea) {
-			GameManager.gameArea.style.filter = shouldBlink ? 'brightness(0.8)' : 'brightness(1)';
 		}
 	}
 	
@@ -609,7 +590,7 @@ export function endBonusStage() {
 	gameObjMap.forEach((obj, key) => {
 		if (key.startsWith('ball_')) {
 			const collectibleBall = obj as CollectibleBall;
-			collectibleBall.value = 1; // 점수 원래대로
+			collectibleBall.value = GameManager.currentStage * 2; // 원래 점수로 복원
 			if (obj.elem) {
 				obj.elem.style.background = '#2ecc71';
 				obj.elem.style.border = '2px solid #27ae60';
