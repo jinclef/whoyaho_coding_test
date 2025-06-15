@@ -161,11 +161,10 @@ function runGameLoop() {
   keysToDelete.forEach(key => gameObjMap.delete(key));
   
   // 공들끼리 충돌 처리
-  handleBallCollisions();
   handleObstacleCollisions();
   
   // 충돌 검사
-  checkCollisions();
+  checkMyBallCollisions();
 
   // 랜덤 이벤트들 - 보너스 스테이지가 아닐 때만
   if (Math.random() < 0.001 && !EatingGameState.isInBonusStage) {
@@ -264,8 +263,10 @@ export function handleCollisions(prefixes: string[]) {
 		for (let j = i + 1; j < objects.length; j++) {
 			const a = objects[i].obj;
 			const b = objects[j].obj;
+			const keyA = objects[i].key;
+			const keyB = objects[j].key;
 			
-			const pairKey = `${objects[i].key}-${objects[j].key}`;
+			const pairKey = `${keyA}-${keyB}`;
 			
 			if (handled.has(pairKey)) {
 				continue;
@@ -283,11 +284,6 @@ export function handleCollisions(prefixes: string[]) {
 			}
 		}
 	}
-}
-
-// 공들끼리 충돌 처리
-export function handleBallCollisions() {
-	handleCollisions([`${BallType[BallType.Normal]}-`, `${BallType[BallType.Bonus]}-`]);
 }
 
 // 방해물들끼리 충돌 처리
@@ -322,6 +318,7 @@ export function nextStage() {
 	EatingGameState.currentStage++;
 	EatingGameState.ballsCollected = 0;
 	EatingGameState.gameTime = 0;
+	EatingGameState.ballsToCollect = EatingGameState.currentStage + 2; // 스테이지마다 공 개수 증가
 	
 	// 방해물 추가
 	createObstacles(gameObjMap);
@@ -337,7 +334,7 @@ export function nextStage() {
 }
 
 // 충돌 검사
-export function checkCollisions() {
+export function checkMyBallCollisions() {
 	const myBall = gameObjMap.get('myBall');
 	if (!myBall) return;
 
