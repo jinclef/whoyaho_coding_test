@@ -257,17 +257,6 @@ body {
     color: white;
 }
 
-@keyframes intensify {
-  0% {
-    opacity: 0.1;
-    background: rgba(255, 0, 0, 0.1);
-  }
-  100% {
-    opacity: 1;
-    background: rgba(255, 0, 0, 0.9);
-  }
-}
-
 .red-zone {
   position: absolute;
   border: 3px solid red;
@@ -277,24 +266,13 @@ body {
   z-index: 10;
 }
 
-@keyframes explode {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(3);
-    opacity: 0;
-  }
-}
-
 .explosion {
   position: absolute;
   width: 100px;
   height: 100px;
   background: radial-gradient(circle, rgba(255, 200, 0, 0.9), rgba(255, 0, 0, 0.8));
   border-radius: 50%;
-  animation: explode 0.5s ease-out forwards;
+  animation: explode-bomb 0.5s ease-out forwards;
   pointer-events: none;
   z-index: 999;
 }
@@ -305,11 +283,6 @@ body {
     border: 3px solid #0af;
     border-radius: 50%;
     animation: portalGlow 1s infinite alternate;
-}
-
-@keyframes portalGlow {
-    0% { box-shadow: 0 0 10px #0af; }
-    100% { box-shadow: 0 0 20px #0af; }
 }
 
 .obstacle {
@@ -349,6 +322,10 @@ body {
     background: #2ecc71;
 }
 
+.invincible-blink {
+  animation: blink 0.5s step-start infinite;
+}
+
 .game-over-panel {
     position: fixed;
     top: 50%;
@@ -379,10 +356,6 @@ body {
     animation: bonusStageGlow 1s infinite alternate;
 }
 
-@keyframes bonusStageGlow {
-    0% { box-shadow: 0 0 20px rgba(255, 107, 107, 0.2); }
-    100% { box-shadow: 0 0 40px rgba(78, 205, 196, 0.2); }
-}
 
 .exit {
     position: absolute;
@@ -390,9 +363,4 @@ body {
     border: 3px solid #00cc00;
     border-radius: 10px;
     animation: exitGlow 1s infinite alternate;
-}
-
-@keyframes exitGlow {
-    0% { box-shadow: 0 0 15px #00ff00; }
-    100% { box-shadow: 0 0 30px #00ff00; }
 }

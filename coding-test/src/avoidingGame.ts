@@ -115,6 +115,8 @@ export function startAvoidingGame() {
   runGameLoop(gameArea);
 }
 
+let lastInvincibleCollisionTime = 0;
+
 function runGameLoop(gameArea: HTMLElement) {
   const currentTime = new Date().getTime();
   if (lastFrameTime === null) lastFrameTime = currentTime;
@@ -123,8 +125,6 @@ function runGameLoop(gameArea: HTMLElement) {
 
   // 슬로우 모션 효과 적용
   const effectiveDt = gameState.isSlowMotionActive(currentTime) ? dt * 0.3 : dt;
-
-  // 게임 오브젝트 업데이트
   for (const [key, gameObj] of gameObjMap.entries()) {
     if (key === "myBall") {
       gameObj.update(dt); // 플레이어는 정상 속도
@@ -165,6 +165,40 @@ function runGameLoop(gameArea: HTMLElement) {
         }
         break;
       }
+    }
+  } else {
+    // 무적 상태일 때 충돌하면 많은 점수 획득
+    const timeSinceLast = currentTime - lastInvincibleCollisionTime;
+    if (timeSinceLast > 500) {  // 0.5초 동안 효과 1번만 출력
+      const collidedBombs = [];
+
+      for (const [key, obj] of gameObjMap.entries()) {
+        if (key.startsWith("Bomb") && myBall && checkCollision(myBall, obj)) {
+          collidedBombs.push(obj);
+        }
+      }
+
+      if (collidedBombs.length > 0) {
+        const totalScore = collidedBombs.length * 500;
+        gameState.addBonusScore(totalScore);
+        effectDisplay.showEffect(`+${totalScore}점!`, "#00ff00");
+        lastInvincibleCollisionTime = currentTime;
+      }
+    }
+  }
+  
+  // 무적 끝나기 3초 전부터 깜빡임
+  if (gameState.isItemInvincibleActive(currentTime)) {
+    const myBallElem = myBall?.elem;
+    if (myBallElem) {
+      const blinkInterval = 300;
+      const shouldBlink = Math.floor((gameState.invincibleEndTime - currentTime) / blinkInterval) % 2 === 0;
+      myBall.elem!.style.opacity = shouldBlink ? '0.5' : '1';
+    }
+  } else {
+    const myBallElem = myBall?.elem;
+    if (myBallElem) {
+      myBall.elem!.style.opacity = '1'; // 초기화
     }
   }
 
