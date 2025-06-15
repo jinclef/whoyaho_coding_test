@@ -45,7 +45,7 @@ export function startEatingGame() {
 		boundingRect.height / 2
 	);
 	gameObjMap.set("myBall", myBallObj);
-  	gameArea.appendChild(myBallElem);
+	gameArea.appendChild(myBallElem);
 		
 	// 수집 가능한 공들 생성
 	createCollectibleBalls();
@@ -403,17 +403,14 @@ export function dropBomb() {
 		);
 
 		if (isHit) {
-			gameOver(); // 🎯 정확히 레드존 중심부 안에 들어가야 터짐
+			gameOver();
 		}
 
-		// 💥 시각적 폭발 이펙트만 별도 추가
 		triggerExplosion(zoneRect.left + zoneRect.width / 2, zoneRect.top + zoneRect.height / 2);
 
 		redZone.remove();
 	});
 }
-
-
 
 // 객체들끼리 충돌 처리 (범용 함수)
 export function handleCollisions(prefixes: string[]) {
@@ -654,7 +651,7 @@ export function createExit() {
 	exit.style.width = '50px';
 	exit.style.height = '50px';
 	
-	// 벽의 특정 위치에 생성
+	// 영역의 특정 위치에 생성
 	const side = Math.floor(Math.random() * 4);
 	switch(side) {
 		case 0: // 상단

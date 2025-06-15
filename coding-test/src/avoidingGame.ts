@@ -90,16 +90,16 @@ export function startAvoidingGame() {
   GameManager.setGameArea(gameArea);
   const boundingRect = gameArea.getBoundingClientRect();
 
+  const myBallElem = document.createElement('div');
+	myBallElem.classList.add("my-ball");
   const myBallObj = new MyBall(
-    document.createElement("div"),
+    myBallElem,
     boundingRect.height * 0.05,
     boundingRect.height * 0.05,
     boundingRect.width / 2,
     boundingRect.height / 2
   );
   gameObjMap.set("myBall", myBallObj);
-  console.log(boundingRect.width/2, boundingRect.height/2);
-  console.log(myBallObj.leftTopX, myBallObj.leftTopY);
 
   // initial BombBalls
   const initialBombCount = 2 + Math.floor(Math.random() * 2);
