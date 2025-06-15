@@ -312,10 +312,6 @@ body {
     background: #2ecc71;
 }
 
-.invincible-blink {
-  animation: blink 0.5s step-start infinite;
-}
-
 .game-over-panel {
     position: fixed;
     top: 50%;
@@ -345,7 +341,6 @@ body {
     z-index: 10000;
     animation: bonusStageGlow 1s infinite alternate;
 }
-
 
 .exit {
     position: absolute;
