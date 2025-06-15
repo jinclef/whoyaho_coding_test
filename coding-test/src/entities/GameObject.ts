@@ -54,7 +54,7 @@ export abstract class GameObject {
     
     const randomAngle = () => (Math.random() - 0.5) * 10; // -5도 ~ +5도 흔들림
 
-    // 좌우 벽
+    // 좌우
     if (this.leftTopX <= 0) {
       if (this.elem?.classList.contains("my-ball")) this.leftTopX = 0;
       else {
@@ -68,8 +68,8 @@ export abstract class GameObject {
         this.degree = 180 - this.degree + randomAngle();
       }
     }
-
-    // 상하 벽
+    
+    // 상하
     if (this.leftTopY <= 0) {
       if (this.elem?.classList.contains("my-ball")) this.leftTopY = 0;
       else {
@@ -77,11 +77,6 @@ export abstract class GameObject {
         this.degree = -this.degree + randomAngle();
       }
     } else if (this.leftTopY + ballSize >= areaHeight) {
-      console.log({
-        bottom: this.leftTopY + ballSize,
-        limit: areaHeight,
-        diff: areaHeight - (this.leftTopY + ballSize)
-      });
 
       if (this.elem?.classList.contains("my-ball")) this.leftTopY = areaHeight - ballSize;
       else {

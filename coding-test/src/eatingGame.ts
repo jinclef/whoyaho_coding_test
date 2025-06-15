@@ -54,8 +54,8 @@ export function startEatingGame() {
 	createObstacles();
 
 	updateUI();
-  registerKeyboardEvent(myBallObj);
-  runGameLoop();
+	registerKeyboardEvent(myBallObj);
+	runGameLoop();
 }
 
 // 게임 루프
@@ -117,12 +117,7 @@ function runGameLoop() {
   
   // 충돌 검사
   checkCollisions();
-  
-  // 진행 중에 벽 생성 (5-10초마다) - 보너스 스테이지가 아닐 때만
-  if (Math.random() < 0.0002 && !GameManager.isInBonusStage) {
-    createWalls();
-  }
-  
+
   // 랜덤 이벤트들 - 보너스 스테이지가 아닐 때만
   if (Math.random() < 0.001 && !GameManager.isInBonusStage) {
     dropBomb();
@@ -307,37 +302,7 @@ export function createObstacles() {
 		
 		gameArea.appendChild(elem);
 	}
-
 	GameManager.obstacleTotalCount += obstacleCount;
-
-}
-
-// 벽 생성
-export function createWalls() {
-	const gameArea = GameManager.gameArea;
-	if (!gameArea) return;
-	
-	const areaWidth = gameArea.clientWidth;
-	const areaHeight = gameArea.clientHeight;
-	
-	// 랜덤 벽들
-	const wallCount = 1 + Math.floor(Math.random() * 3);
-	for (let i = 0; i < wallCount; i++) {
-		const wall = document.createElement('div');
-		wall.classList.add('wall');
-		wall.style.width = (50 + Math.random() * 100) + 'px';
-		wall.style.height = (20 + Math.random() * 30) + 'px';
-		wall.style.left = Math.random() * (areaWidth - 150) + 'px';
-		wall.style.top = Math.random() * (areaHeight - 50) + 'px';
-		gameArea.appendChild(wall);
-		
-		// 벽 자동 제거
-		setTimeout(() => {
-			if (wall.parentNode) {
-				wall.parentNode.removeChild(wall);
-			}
-		}, 5000 + Math.random() * 5000);
-	}
 }
 
 // 포탈 생성
@@ -665,9 +630,6 @@ export function nextStage() {
 	
 	// 방해물 추가
 	createObstacles();
-	
-	// 새로운 벽들 생성
-	// createWalls();
 
 	// 목표 달성 모드: 탈출구 제거
 	const exit = document.querySelector('.exit');

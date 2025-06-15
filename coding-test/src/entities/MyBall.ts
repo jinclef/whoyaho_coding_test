@@ -20,60 +20,9 @@ export class MyBall extends GameObject {
     this.leftTopX += dx;
     this.leftTopY += dy;
 
-    // super.checkBounds();
     super.detectAreaCollision();
-    this.checkWallCollisions();
     this.checkPortalCollisions();
     this.render();
-  }
-
-
-  checkWallCollisions() { // TODO: refactor
-    if (!GameManager.gameArea) return;
-    
-    const radius = this.width / 2;
-    const walls = document.querySelectorAll('.wall');
-    
-    walls.forEach(wall => {
-      if (!wall.parentNode) return;
-      
-      const wallRect = wall.getBoundingClientRect();
-      const gameAreaRect = GameManager.gameArea!.getBoundingClientRect();
-      
-      const wallLeft = wallRect.left - gameAreaRect.left;
-      const wallTop = wallRect.top - gameAreaRect.top;
-      const wallRight = wallLeft + wallRect.width;
-      const wallBottom = wallTop + wallRect.height;
-      
-      // 공의 경계 박스
-      const ballLeft = this.leftTopX - radius;
-      const ballRight = this.leftTopX + radius;
-      const ballTop = this.leftTopY - radius;
-      const ballBottom = this.leftTopY + radius;
-      
-      // 충돌 검사 및 위치 보정
-      if (ballRight > wallLeft && ballLeft < wallRight &&
-          ballBottom > wallTop && ballTop < wallBottom) {
-        
-        // 가장 가까운 면으로 밀어내기
-        const overlapLeft = ballRight - wallLeft;
-        const overlapRight = wallRight - ballLeft;
-        const overlapTop = ballBottom - wallTop;
-        const overlapBottom = wallBottom - ballTop;
-        
-        const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
-        
-        if (minOverlap === overlapLeft) {
-          this.leftTopX = wallLeft - radius;
-        } else if (minOverlap === overlapRight) {
-          this.leftTopX = wallRight + radius;
-        } else if (minOverlap === overlapTop) {
-          this.leftTopY = wallTop - radius;
-        } else {
-          this.leftTopY = wallBottom + radius;
-        }
-      }
-    });
   }
 
   checkPortalCollisions() {

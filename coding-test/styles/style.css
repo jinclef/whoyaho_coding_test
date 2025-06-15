@@ -184,7 +184,7 @@ body {
   background-color: antiquewhite;
   width: 80vw;
   height: 80vh;
-  /* overflow: hidden; */
+  overflow: hidden;
 }
 
 #my-ball {
@@ -297,12 +297,6 @@ body {
   animation: explode 0.5s ease-out forwards;
   pointer-events: none;
   z-index: 999;
-}
-
-.wall {
-    position: absolute;
-    background: #8B4513;
-    border: 2px solid #654321;
 }
 
 .portal {
