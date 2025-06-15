@@ -27,40 +27,7 @@ export class BombBall extends GameObject {
 
     this.leftTopX += dx;
     this.leftTopY += dy;
-
-    this.detectWallCollision();
+    
     this.render();
-  }
-
-  detectWallCollision() {
-    const ballSize = this.width;
-    const area = this.elem!.parentElement as HTMLElement;
-    const areaWidth = area.clientWidth;
-    const areaHeight = area.clientHeight;
-
-    const randomAngle = () => (Math.random() - 0.5) * 10; // -5도 ~ +5도 흔들림
-
-    if (this.leftTopX <= 0) {
-      this.leftTopX = 1;
-      this.degree = 180 - this.degree + randomAngle();
-    } else if (this.leftTopX + ballSize >= areaWidth) {
-      this.leftTopX = areaWidth - ballSize - 1;
-      this.degree = 180 - this.degree + randomAngle();
-    }
-
-    if (this.leftTopY <= 0) {
-      this.leftTopY = 1;
-      this.degree = -this.degree + randomAngle();
-    } else if (this.leftTopY + ballSize >= areaHeight) {
-      this.leftTopY = areaHeight - ballSize - 1;
-      this.degree = -this.degree + randomAngle();
-    }
-
-    this.degree = (this.degree + 360) % 360;
-  }
-
-  render() {
-    this.elem!.style.left = `${this.leftTopX}px`;
-    this.elem!.style.top = `${this.leftTopY}px`;
   }
 }

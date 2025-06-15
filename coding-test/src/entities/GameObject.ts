@@ -45,12 +45,10 @@ export abstract class GameObject {
   }
 
   detectAreaCollision() {
-    if (!GameManager.gameArea) return;
-    
-    const area = GameManager.gameArea;
+    const ballSize = this.width;
+    const area = this.elem!.parentElement as HTMLElement;
     const areaWidth = area.clientWidth;
     const areaHeight = area.clientHeight;
-    const ballSize = this.width;
     
     const randomAngle = () => (Math.random() - 0.5) * 10; // -5도 ~ +5도 흔들림
 
