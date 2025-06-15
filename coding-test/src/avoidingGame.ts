@@ -9,7 +9,7 @@ import { spawnRandomItem } from "./entities/avoidingGame/ItemSpawner";
 import { applyItemEffect } from "./entities/avoidingGame/applyItemEffect";
 
 // 게임 상태 관리
-class GameState {
+class AvoidGameState {
 	baseScore: number = 0; // 시간/폭탄 기반 점수
   bonusScore: number = 0; // 아이템으로 얻은 보너스 점수
   lives: number = 1;
@@ -54,9 +54,9 @@ const gameObjMap: Map<string, GameObject> = new Map();
 let elapsedTime = 0;
 let lastBombSpawnTime = 0;
 let lastItemSpawnTime = 0;
-const bombSpawnInterval = 3000; // TODO: 시간이 지날수록 빠르게 스폰.
-const itemSpawnInterval = 8000; // 8초마다 아이템 스폰 // TODO: random
-const gameState = new GameState();
+const bombSpawnInterval = 3000;
+const itemSpawnInterval = 8000; // 8초마다 아이템 스폰
+const gameState = new AvoidGameState();
 let effectDisplay: EffectDisplay;
 
 export function startAvoidingGame() {

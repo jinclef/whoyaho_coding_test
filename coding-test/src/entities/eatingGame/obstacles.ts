@@ -1,6 +1,7 @@
 import { Obstacle } from '../GameBall';
 import { GameManager } from '../GameManager';
 import { GameObject } from '../GameObject';
+import { EatingGameState } from '../../eatingGame';
 
 // 방해물 생성
 export function createObstacles(gameObjMap: Map<string, GameObject>) {
@@ -9,8 +10,8 @@ export function createObstacles(gameObjMap: Map<string, GameObject>) {
     
     const areaWidth = gameArea.clientWidth;
     const areaHeight = gameArea.clientHeight;
-    const obstacleCount = (GameManager.currentStage * 2); // 방해물 더 많이
-    const obstacleTotalCount = GameManager.obstacleTotalCount;
+    const obstacleCount = (EatingGameState.currentStage * 2); // 방해물 더 많이
+    const obstacleTotalCount = EatingGameState.obstacleTotalCount;
     
     // 탈출구 위치 확인 - 근처에 안 생기게 함
     const exit = document.querySelector('.exit');
@@ -51,7 +52,7 @@ export function createObstacles(gameObjMap: Map<string, GameObject>) {
         const obstacle = new Obstacle(elem, 25, 25, x, y);
         gameObjMap.set(`Obstacle-${i}`, obstacle);
         
-        if (GameManager.isInBonusStage) {
+        if (EatingGameState.isInBonusStage) {
             elem.classList.add('bonus-edible');
             elem.style.background = 'linear-gradient(45deg, #ffd700, #ffed4e)';
             elem.style.border = '2px solid #ffa500';
@@ -60,5 +61,5 @@ export function createObstacles(gameObjMap: Map<string, GameObject>) {
         
         gameArea.appendChild(elem);
     }
-    GameManager.obstacleTotalCount += obstacleCount;
+    EatingGameState.obstacleTotalCount += obstacleCount;
 }

@@ -1,4 +1,5 @@
 import { GameManager } from '../GameManager';
+import { EatingGameState } from '../../eatingGame';
 
 // 탈출구 생성
 export function createExit() {
@@ -33,6 +34,6 @@ export function createExit() {
             exit.style.top = Math.random() * (areaHeight - 50) + 'px';
             break;
     }
-    GameManager.exitCreated = true;
+    EatingGameState.exitCreated = true;
     gameArea.appendChild(exit);
 }

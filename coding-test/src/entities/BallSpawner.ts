@@ -2,6 +2,7 @@
 import { GameObject } from "./GameObject";
 import { CollectibleBall, Obstacle } from "./GameBall";
 import { GameManager } from "./GameManager";
+import { EatingGameState } from "../eatingGame";
 
 let ballIdCounter = 0;
 
@@ -61,10 +62,10 @@ export function spawnBall(type: BallType, gameArea: HTMLElement, map: Map<string
       ball = new Obstacle(elem, size, size, x, y);
       break;
     case BallType.Normal:
-      ball = new CollectibleBall(elem, size/2, size/2, x, y, BallType.Normal, GameManager.currentStage * 2);
+      ball = new CollectibleBall(elem, size/2, size/2, x, y, BallType.Normal, EatingGameState.currentStage * 2);
       break;
     case BallType.Bonus:
-      const randomLetter = GameManager.bonusLetters[Math.floor(Math.random() * GameManager.bonusLetters.length)];
+      const randomLetter = EatingGameState.bonusLetters[Math.floor(Math.random() * EatingGameState.bonusLetters.length)];
       ball = new CollectibleBall(elem, size/2, size/2, x, y, BallType.Bonus, randomLetter);
       break;
     case BallType.Obstacle:

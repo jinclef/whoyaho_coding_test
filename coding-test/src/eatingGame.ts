@@ -4,7 +4,6 @@ import { MyBall } from "./entities/MyBall";
 import { checkCollision, registerKeyboardEvent } from "./utils/gameUtils";
 import { GameObject } from "./entities/GameObject";
 import { CollectibleBall } from "./entities/GameBall";
-import { Obstacle } from "./entities/GameBall";
 import { BallType, spawnBall } from "./entities/BallSpawner";
 import { endBonusStage, startBonusStage } from "./entities/eatingGame/bonusStage";
 import { createExit } from "./entities/eatingGame/exit";
@@ -17,6 +16,47 @@ let lastFrameTime: null | number = null;
 let dt = 0;
 
 const gameObjMap: Map<string, GameObject> = new Map();
+
+export class EatingGameState {
+	static exitCreated = false;
+  static currentStage = 1;
+  static score = 0;
+  static startTime = 0;
+  static gameTime = 0;
+  static ballsToCollect = 3;
+  static ballsCollected = 0;
+  static bonusLetters = ['B', 'O', 'N', 'U', 'S'];
+  static bonusCollected: string[] = [];
+  static isInBonusStage = false;
+  static bonusStageTimer = 0;
+  static hasAttackItem = false;
+  static lastBonusSpawnTime = 0;
+  static bonusSpawnInterval = 5000; // 5초마다 스폰
+  static obstacleTotalCount = 0;
+  static ballSpawnTimer = 0;
+  static baseSpawnInterval = 500; // 기본 생성 간격 (밀리초)
+  static baseBallLifeTime = 8000; // 기본 공 수명 (밀리초)
+  static maxInfiniteBalls = 50; // 성능 보호용 최대 개수
+  static infiniteBallId = 0; // 무한 생성 공 ID 카운터
+  static portalTotalCount = 0;
+
+	static reset(){
+    this.currentStage = 1;
+    this.score = 0;
+    this.startTime = Date.now();
+    this.gameTime = 0;
+    this.ballsCollected = 0;
+    this.bonusCollected = [];
+    this.isInBonusStage = false;
+    this.bonusStageTimer = 0;
+    this.hasAttackItem = false;
+    this.lastBonusSpawnTime = 0;
+    this.exitCreated = false;
+    this.ballSpawnTimer = 0;
+    this.infiniteBallId = 0;
+	}
+}
+
 
 // 게임 시작
 export function startEatingGame() {
@@ -34,13 +74,14 @@ export function startEatingGame() {
   gameArea.style.display = "flex";
 
   GameManager.reset();
+	EatingGameState.reset();
   gameObjMap.clear();
 	GameManager.setGameArea(gameArea);
   GameManager.gameMode = GameMode.AVOIDING;
   
 	const boundingRect = gameArea.getBoundingClientRect();
   GameManager.gameStatus = GameStatus.PLAYING;
-  GameManager.startTime = Date.now();
+  EatingGameState.startTime = Date.now();
   
   const myBallElem = document.createElement('div');
 	myBallElem.classList.add("my-ball");
@@ -55,7 +96,7 @@ export function startEatingGame() {
 	gameArea.appendChild(myBallElem);
 		
 	// 수집 가능한 공들 생성
-	for (let i = 0; i < GameManager.ballsToCollect; i++) spawnBall(BallType.Normal, gameArea, gameObjMap);
+	for (let i = 0; i < EatingGameState.ballsToCollect; i++) spawnBall(BallType.Normal, gameArea, gameObjMap);
 	
 	// 방해물 생성 (더 많이)
 	createObstacles(gameObjMap);
@@ -73,34 +114,34 @@ function runGameLoop() {
   }
   dt = currentTime - lastFrameTime;
   
-  if (GameManager.gameStatus === GameStatus.PLAYING || GameManager.isInBonusStage) {
+  if (GameManager.gameStatus === GameStatus.PLAYING || EatingGameState.isInBonusStage) {
     // 보너스 스테이지가 아닐 때만 시간 증가
-    if (!GameManager.isInBonusStage) {    
-      GameManager.gameTime = currentTime - GameManager.startTime;
+    if (!EatingGameState.isInBonusStage) {    
+      EatingGameState.gameTime = currentTime - EatingGameState.startTime;
     }
       
     // 보너스 글자 랜덤 스폰 (목표 달성 모드에서만)
-    if (currentTime - GameManager.lastBonusSpawnTime > GameManager.bonusSpawnInterval) {
+    if (currentTime - EatingGameState.lastBonusSpawnTime > EatingGameState.bonusSpawnInterval) {
       // spawnRandomBonusLetter();
 			spawnBall(BallType.Bonus, GameManager.gameArea!, gameObjMap);
-      GameManager.lastBonusSpawnTime = currentTime;
-      GameManager.bonusSpawnInterval = 3000 + Math.random() * 4000; // 3-7초 간격
+      EatingGameState.lastBonusSpawnTime = currentTime;
+      EatingGameState.bonusSpawnInterval = 3000 + Math.random() * 4000; // 3-7초 간격
     }
   }
     
   // 보너스 스테이지 타이머
-  if (GameManager.isInBonusStage) {
-    GameManager.bonusStageTimer -= dt;
+  if (EatingGameState.isInBonusStage) {
+    EatingGameState.bonusStageTimer -= dt;
     
     // 보너스 스테이지 끝나기 3초 전부터 깜빡임
     const myBall = gameObjMap.get('myBall');
-    if (GameManager.bonusStageTimer <= 3000 && myBall) {
+    if (EatingGameState.bonusStageTimer <= 3000 && myBall) {
       const blinkInterval = 300; // 0.3초마다 깜빡임
-      const shouldBlink = Math.floor(GameManager.bonusStageTimer / blinkInterval) % 2 === 0;
+      const shouldBlink = Math.floor(EatingGameState.bonusStageTimer / blinkInterval) % 2 === 0;
       myBall.elem!.style.opacity = shouldBlink ? '0.3' : '1';
     }
     
-    if (GameManager.bonusStageTimer <= 0) {
+    if (EatingGameState.bonusStageTimer <= 0) {
       endBonusStage(gameObjMap);
     }
   }
@@ -127,12 +168,12 @@ function runGameLoop() {
   checkCollisions();
 
   // 랜덤 이벤트들 - 보너스 스테이지가 아닐 때만
-  if (Math.random() < 0.001 && !GameManager.isInBonusStage) {
+  if (Math.random() < 0.001 && !EatingGameState.isInBonusStage) {
     explodeRedZone(gameObjMap);
   }
   
   // 포탈 생성
-  if (Math.random() < 0.001 && !GameManager.isInBonusStage && GameManager.portalTotalCount < 1) {
+  if (Math.random() < 0.001 && !EatingGameState.isInBonusStage && EatingGameState.portalTotalCount < 1) {
     createPortals();
   }
 
@@ -154,8 +195,9 @@ function restartEatingGame() {
   }
   
   GameManager.reset();
+	EatingGameState.reset();
   GameManager.gameStatus = GameStatus.PLAYING;
-  GameManager.startTime = Date.now();
+  EatingGameState.startTime = Date.now();
   
   const gameOverPanel = document.getElementById('game-over-panel');
   const gameContainer = document.getElementById('game-container-eating');
@@ -277,9 +319,9 @@ export function separateBalls(a: GameObject, b: GameObject) {
 
 // 다음 스테이지로
 export function nextStage() {
-	GameManager.currentStage++;
-	GameManager.ballsCollected = 0;
-	GameManager.gameTime = 0;
+	EatingGameState.currentStage++;
+	EatingGameState.ballsCollected = 0;
+	EatingGameState.gameTime = 0;
 	
 	// 방해물 추가
 	createObstacles(gameObjMap);
@@ -289,7 +331,7 @@ export function nextStage() {
 	if (exit && exit.parentNode) {
 		exit.parentNode.removeChild(exit);
 	}
-	for (let i = 0; i < GameManager.ballsToCollect; i++) spawnBall(BallType.Normal, GameManager.gameArea!, gameObjMap);
+	for (let i = 0; i < EatingGameState.ballsToCollect; i++) spawnBall(BallType.Normal, GameManager.gameArea!, gameObjMap);
 	
 	updateUI();
 }
@@ -306,14 +348,14 @@ export function checkCollisions() {
 				const collectibleBall = obj as CollectibleBall;
 				if (collectibleBall.type === BallType.Normal) {
 					const value = typeof collectibleBall.value === 'number' ? collectibleBall.value : parseInt(collectibleBall.value.toString());
-					GameManager.score += value;
-					GameManager.ballsCollected++;
+					EatingGameState.score += value;
+					EatingGameState.ballsCollected++;
 				}
 				else if (collectibleBall.type === BallType.Bonus) {
 					const letter = collectibleBall.value.toString();
-					if (!GameManager.bonusCollected.includes(letter)) {
-						GameManager.bonusCollected.push(letter);
-						if (GameManager.bonusCollected.length === GameManager.bonusLetters.length) { // 모든 보너스 글자를 모았을 때
+					if (!EatingGameState.bonusCollected.includes(letter)) {
+						EatingGameState.bonusCollected.push(letter);
+						if (EatingGameState.bonusCollected.length === EatingGameState.bonusLetters.length) { // 모든 보너스 글자를 모았을 때
 							startBonusStage(gameObjMap);
 						}
 					}
@@ -324,7 +366,7 @@ export function checkCollisions() {
 				}
 				gameObjMap.delete(key);
 				
-				if (!GameManager.exitCreated && GameManager.ballsCollected >= GameManager.ballsToCollect) {
+				if (!EatingGameState.exitCreated && EatingGameState.ballsCollected >= EatingGameState.ballsToCollect) {
 					createExit();
 				}
 			}
@@ -335,9 +377,9 @@ export function checkCollisions() {
 	gameObjMap.forEach((obj, key) => {
 		if (key.startsWith(`${BallType[BallType.Obstacle]}-`)) {
 			if (checkCollision(myBall, obj)) {
-				if (GameManager.isInBonusStage) {
+				if (EatingGameState.isInBonusStage) {
 					// 보너스 스테이지에서는 방해물을 먹으면 점수 획득
-					GameManager.score += GameManager.currentStage * 5; // 스테이지에 따라 점수 증가
+					EatingGameState.score += EatingGameState.currentStage * 5; // 스테이지에 따라 점수 증가
 					if (obj.elem && obj.elem.parentNode) {
 						obj.elem.parentNode.removeChild(obj.elem);
 					}
@@ -359,7 +401,7 @@ export function checkCollisions() {
 		
 		if (ballX >= exitRect.left && ballX <= exitRect.right &&
 				ballY >= exitRect.top && ballY <= exitRect.bottom) {
-			GameManager.exitCreated = false;
+			EatingGameState.exitCreated = false;
 			nextStage();
 		}
 	}
@@ -372,8 +414,8 @@ export function updateUI() {
 	const ballsCountElem = document.getElementById('balls-count');
 	const bonusTimeElem = document.getElementById('bonus-time');
 	
-	if (scoreElem) scoreElem.textContent = GameManager.score.toString();
-	if (stageElem) stageElem.textContent = GameManager.currentStage.toString();
+	if (scoreElem) scoreElem.textContent = EatingGameState.score.toString();
+	if (stageElem) stageElem.textContent = EatingGameState.currentStage.toString();
 	
 	const timeDisplay = document.getElementById('time-display');
 	const ballsLeft = document.getElementById('balls-left');
@@ -381,21 +423,21 @@ export function updateUI() {
 	
 	if (timeDisplay) timeDisplay.style.display = 'none';
 	if (ballsLeft) ballsLeft.style.display = 'block';
-	if (ballsCountElem) ballsCountElem.textContent = (GameManager.ballsToCollect - GameManager.ballsCollected).toString();
+	if (ballsCountElem) ballsCountElem.textContent = (EatingGameState.ballsToCollect - EatingGameState.ballsCollected).toString();
 
 	// 보너스 스테이지 시간 표시
-	if (GameManager.isInBonusStage) {
+	if (EatingGameState.isInBonusStage) {
 		if (bonusTimeDisplay) bonusTimeDisplay.style.display = 'block';
-		if (bonusTimeElem) bonusTimeElem.textContent = Math.max(0, Math.floor(GameManager.bonusStageTimer / 1000)).toString();
+		if (bonusTimeElem) bonusTimeElem.textContent = Math.max(0, Math.floor(EatingGameState.bonusStageTimer / 1000)).toString();
 	} else {
 		if (bonusTimeDisplay) bonusTimeDisplay.style.display = 'none';
 	}
 
 	// 보너스 글자 UI 업데이트
-	GameManager.bonusLetters.forEach(letter => {
+	EatingGameState.bonusLetters.forEach(letter => {
 		const elem = document.getElementById(`bonus-${letter}`);
 		if (elem) {
-			elem.classList.toggle('collected', GameManager.bonusCollected.includes(letter));
+			elem.classList.toggle('collected', EatingGameState.bonusCollected.includes(letter));
 		}
 	});
 }
@@ -411,7 +453,7 @@ export function showGameOver() {
 	const finalStageElem = document.getElementById('final-stage');
 	const gameOverPanel = document.getElementById('game-over-panel');
 	
-	if (finalScoreElem) finalScoreElem.textContent = GameManager.score.toString();
-	if (finalStageElem) finalStageElem.textContent = GameManager.currentStage.toString();
+	if (finalScoreElem) finalScoreElem.textContent = EatingGameState.score.toString();
+	if (finalStageElem) finalStageElem.textContent = EatingGameState.currentStage.toString();
 	if (gameOverPanel) gameOverPanel.style.display = 'block';
 }
