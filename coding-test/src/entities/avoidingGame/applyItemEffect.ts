@@ -10,23 +10,25 @@ export function applyItemEffect(itemType: ItemType, currentTime: number, gameSta
       break;
       
     case ItemType.PointsSmall:
-			gameState.addBonusScore(1000);
-      effectDisplay.showEffect("+1000점!", "#ffff00");
+      const smallBonus = 1000;
+			gameState.addBonusScore(smallBonus);
+      effectDisplay.showEffect(`+${smallBonus}점!`, "#ffff00");
       break;
       
     case ItemType.PointsBig:
-			gameState.addBonusScore(10000);
-      effectDisplay.showEffect("+10000점!", "#ff00ff");
+      const bigBonus = 10000;
+			gameState.addBonusScore(bigBonus);
+      effectDisplay.showEffect(`+${bigBonus}점!`, "#ff00ff");
       break;
       
     case ItemType.RemoveBomb:
-      removeBomb(gameObjMap);
+      removeNearestBomb(gameObjMap);
       effectDisplay.showEffect("폭탄 제거!", "#00ff00");
       break;
       
     case ItemType.ExtraLife:
       gameState.lives++;
-      effectDisplay.showEffect(`생명 +1 (총 ${gameState.lives}개)`, "#ff4080");
+      effectDisplay.showEffect(`라이프 +1 (총 ${gameState.lives}개)`, "#ff4080");
       break;
       
     case ItemType.Invincible:
@@ -37,18 +39,45 @@ export function applyItemEffect(itemType: ItemType, currentTime: number, gameSta
   }
 }
 
+function removeNearestBomb(gameObjMap: Map<string, GameObject>) {
+  const bombEntries = Array.from(gameObjMap.entries())
+    .filter(([key]) => key.startsWith("Bomb"));
 
+  if (bombEntries.length === 0) return;
 
-function removeBomb(gameObjMap: Map<string, GameObject>) {
-  const bombKeys = Array.from(gameObjMap.keys()).filter(key => key.startsWith("Bomb"));
-  if (bombKeys.length > 0) {
-    const randomBombKey = bombKeys[Math.floor(Math.random() * bombKeys.length)];
-    const bomb = gameObjMap.get(randomBombKey);
-    if (bomb && bomb.elem && bomb.elem.parentNode) {
-			createExplosionEffect(bomb.leftTopX + bomb.width / 2, bomb.leftTopY + bomb.height / 2, bomb.elem.parentNode as HTMLElement);
-      bomb.elem.parentNode.removeChild(bomb.elem);
+  // 가장 가까운 Bomb 찾기
+  let nearestBombKey = "";
+  let nearestBomb: GameObject | null = null;
+  let minDistance = Infinity;
+
+  const myBall = gameObjMap.get("myBall");
+  if (!myBall) return;
+  if (!myBall.elem) return;
+
+  for (const [key, bomb] of bombEntries) {
+    const bombCenterX = bomb.leftTopX + bomb.width / 2;
+    const bombCenterY = bomb.leftTopY + bomb.height / 2;
+    const myCenterX = myBall.leftTopX + myBall.width / 2;
+    const myCenterY = myBall.leftTopY + myBall.height / 2;
+
+    const distance = Math.hypot(myCenterX - bombCenterX, myCenterY - bombCenterY);
+
+    if (distance < minDistance) {
+      minDistance = distance;
+      nearestBombKey = key;
+      nearestBomb = bomb;
     }
-    gameObjMap.delete(randomBombKey);
+  }
+
+  // 제거
+  if (nearestBomb && nearestBomb.elem && nearestBomb.elem.parentNode) {
+    createExplosionEffect(
+      nearestBomb.leftTopX + nearestBomb.width / 2,
+      nearestBomb.leftTopY + nearestBomb.height / 2,
+      nearestBomb.elem.parentNode as HTMLElement
+    );
+    nearestBomb.elem.parentNode.removeChild(nearestBomb.elem);
+    gameObjMap.delete(nearestBombKey);
   }
 }
 

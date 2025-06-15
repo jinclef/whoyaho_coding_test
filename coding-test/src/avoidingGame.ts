@@ -31,7 +31,6 @@ class GameState {
   // 보너스 점수 추가
   addBonusScore(points: number) {
     this.bonusScore += points;
-    console.log(`Bonus added: +${points}, Total bonus: ${this.bonusScore}, Total score: ${this.getScore()}`);
   }
 
   isSlowMotionActive(currentTime: number): boolean {
@@ -166,10 +165,10 @@ function runGameLoop(gameArea: HTMLElement) {
         break;
       }
     }
-  } else {
-    // 무적 상태일 때 충돌하면 많은 점수 획득
+  } else if(gameState.isItemInvincibleActive(currentTime) ) {
+    // 아이템 무적 상태일 때 충돌하면 많은 점수 획득
     const timeSinceLast = currentTime - lastInvincibleCollisionTime;
-    if (timeSinceLast > 500) {  // 0.5초 동안 효과 1번만 출력
+    if (timeSinceLast > 300) {  // 0.3초 동안 효과 1번만 출력
       const collidedBombs = [];
 
       for (const [key, obj] of gameObjMap.entries()) {
