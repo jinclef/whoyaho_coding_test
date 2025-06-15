@@ -113,7 +113,7 @@ function runGameLoop() {
   // 보너스 공 수명 관리 (gameObjMap에서 제거된 것들 정리)
   const keysToDelete: string[] = [];
   gameObjMap.forEach((obj, key) => {
-    if (key.startsWith(`${BallType.Bonus}-`) && obj.elem && !obj.elem.parentNode) {
+    if (key.startsWith(`${BallType[BallType.Bonus]}-`) && obj.elem && !obj.elem.parentNode) {
       keysToDelete.push(key);
     }
   });
@@ -245,12 +245,12 @@ export function handleCollisions(prefixes: string[]) {
 
 // 공들끼리 충돌 처리
 export function handleBallCollisions() {
-	handleCollisions([`${BallType.Normal}-`, `${BallType.Bonus}-`]);
+	handleCollisions([`${BallType[BallType.Normal]}-`, `${BallType[BallType.Bonus]}-`]);
 }
 
 // 방해물들끼리 충돌 처리
 export function handleObstacleCollisions() {
-	handleCollisions([`${BallType.Obstacle}-`]);
+	handleCollisions([`${BallType[BallType.Obstacle]}-`]);
 }
 
 export function separateBalls(a: GameObject, b: GameObject) {
@@ -301,7 +301,7 @@ export function checkCollisions() {
 
 	// 수집 가능한 공들과의 충돌
 	gameObjMap.forEach((obj, key) => {
-		if (key.startsWith(`${BallType.Normal}-`) || key.startsWith(`${BallType.Bonus}-`)) {
+		if (key.startsWith(`${BallType[BallType.Normal]}-`) || key.startsWith(`${BallType[BallType.Bonus]}-`)) {
 			if (checkCollision(myBall, obj)) {
 				const collectibleBall = obj as CollectibleBall;
 				if (collectibleBall.type === BallType.Normal) {
@@ -333,11 +333,11 @@ export function checkCollisions() {
 	
 	// 방해물과의 충돌
 	gameObjMap.forEach((obj, key) => {
-		if (key.startsWith(`${BallType.Obstacle}-`)) {
+		if (key.startsWith(`${BallType[BallType.Obstacle]}-`)) {
 			if (checkCollision(myBall, obj)) {
 				if (GameManager.isInBonusStage) {
 					// 보너스 스테이지에서는 방해물을 먹으면 점수 획득
-					GameManager.score += 10; // 방해물 점수
+					GameManager.score += GameManager.currentStage * 5; // 스테이지에 따라 점수 증가
 					if (obj.elem && obj.elem.parentNode) {
 						obj.elem.parentNode.removeChild(obj.elem);
 					}
