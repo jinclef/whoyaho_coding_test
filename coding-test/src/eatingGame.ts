@@ -10,6 +10,7 @@ import { createExit } from "./entities/eatingGame/exit";
 import { explodeRedZone } from "./entities/eatingGame/redZone";
 import { createObstacles } from "./entities/eatingGame/obstacles";
 import { createPortals } from "./entities/eatingGame/portal";
+import { handleObstacleWallCollision, createObstacleWalls, ObstacleWall } from "./entities/eatingGame/obstacleWall";
 
 let raf: number;
 let lastFrameTime: null | number = null;
@@ -162,6 +163,9 @@ function runGameLoop() {
   
   // 공들끼리 충돌 처리
   handleObstacleCollisions();
+
+	// 벽과 장애물벽 충돌 차리
+	handleObstacleWallCollision(gameObjMap);
   
   // 충돌 검사
   checkMyBallCollisions();
@@ -208,7 +212,16 @@ function restartEatingGame() {
   const gameArea = document.getElementById('game-area-eating');
   if (gameArea) {
     gameArea.innerHTML = '';
+		gameArea.style.backgroundColor = `antiquewhite`;
   }
+	// 다시하기 시 CollectibleBalls가 사라지지 않는 문제 해결
+	const collectibleBalls = document.getElementsByClassName('collectible');
+	for (let i=0; i<collectibleBalls.length; i++){
+		const cb = collectibleBalls[i];
+		if(cb && cb.parentElement){
+			cb.parentElement.removeChild(cb);
+		}
+	}
   
   gameObjMap.clear();
   lastFrameTime = null;
@@ -319,6 +332,24 @@ export function nextStage() {
 	EatingGameState.ballsCollected = 0;
 	EatingGameState.gameTime = 0;
 	EatingGameState.ballsToCollect = EatingGameState.currentStage + 2; // 스테이지마다 공 개수 증가
+	
+	// 기존의 벽 삭제
+	const obstacleWalls = document.getElementsByClassName('obstacle-wall');
+	console.log("will be deleted: " + obstacleWalls.length);
+	for(let i=0; i<obstacleWalls.length; i++){
+		const wall = obstacleWalls[i];
+		if (wall && wall.parentElement){
+			wall.parentElement.removeChild(wall);
+		}
+	}
+
+
+	// 벽 새로 생성
+	createObstacleWalls(gameObjMap);
+
+	// 배경색 변경
+	const gameArea = document.getElementById("game-area-eating")!;
+	gameArea.style.backgroundColor = /* random */ `hsl(${Math.random() * 360}, 30%, 50%)`;
 	
 	// 방해물 추가
 	createObstacles(gameObjMap);
